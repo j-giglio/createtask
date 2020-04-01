@@ -3,13 +3,17 @@
 let user = {
   x: 30,
   y: 350,
+  canFall: false,
+  jump: function() {
+    user.canFall = true;
+  },
   standing: function() {
     ctx.beginPath();
     ctx.rect(user.x, user.y, 50, 120);
     ctx.fill()
     ctx.closePath();
-    console.log("yee");
-  }
+  },
+
 }
 
 ///////////////////// APP STATE (VARIABLES) /////////////////////////
@@ -23,7 +27,8 @@ const ctx = canvas.getContext("2d");
 
 ///////////////////// EVENT LISTENERS ///////////////////////////////
 
-canvas.onclick = runTicks
+canvas.onclick = runTicks;
+document.addEventListener("keydown", keys);
 
 ///////////////////// ENGINE /////////////////////////////////////
 
@@ -32,10 +37,26 @@ function runTicks() {
 };
 
 function perTick() {
+  gravity()
+  //  these are rendering functions
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  // canvas.className = (canvas.className === "active") ? "inactive" : "active"
-  // console.log(canvas.className);
   user.standing()
 }
+
+function gravity() {
+
+}
+
+function keys(a) {
+  if (a.key === "ArrowRight"){
+    user.x++;
+  };
+  if (a.key === "ArrowLeft"){
+    user.x--;
+  };
+  if (a.key === "ArrowUp"){
+    user.jump();
+  };
+};
 
 ///////////////////// LEVELS /////////////////////////////////////
