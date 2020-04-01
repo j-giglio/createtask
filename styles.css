@@ -1,0 +1,14 @@
+/* .playarea {
+  align-items: center;
+} */
+
+#board {
+  border-style: solid;
+  margin-left: auto;
+  margin-right: auto;
+  display: block;
+}
+
+.active {
+  background-color: red;
+}
