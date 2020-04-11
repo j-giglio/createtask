@@ -3,6 +3,8 @@
 let levels = [
 //level one
   {
+    startX: 30,
+    startY: 410,
     blocks: [
       {
         x: 0,
@@ -20,8 +22,13 @@ let levels = [
       },
     ],
     enemies: [
+      {
+        x: 450,
+        y: 300,
+        type: 1/*enemy1*/,
 
-    ]
+      },
+    ],
   },
 //level two
 ]
@@ -29,8 +36,8 @@ let levels = [
 ///////////////////// OBJECTS
 
 let user = {
-  x: 30,
-  y: 410,
+  x: null,
+  y: null,
   walkLeft: false,
   walkRight: false,
   touchLeft: false,
@@ -43,16 +50,21 @@ let user = {
   jump: function() {
     user.canFall = true;
   },
-  standing: userStanding,
-  },
+  sprite: null,
+};
 
-}
+// let enemy1 = {
+//   sprite:
+// };
 
 ///////////////////// VARIABLES
 
 let currentLevel = 0;
 let mobile = [user];
 let onScreenThings = [];
+let tickCount = 0;
+let sprUserWalkingFrame = 1;
+
 
 ///////////////////// ELEMENTS
 
@@ -62,31 +74,35 @@ const ctx = canvas.getContext("2d");
 ///////////////////// EVENT LISTENERS
 
 canvas.onclick = runTicks;
-// document.getElementsByClassName("inactive").onclick = runTicks;
+// document.getElementsByClassName("inactive").onclick = startGame;
 document.addEventListener("keydown", keyDown);
 document.addEventListener("keyup", keyUp);
 
 ///////////////////// ENGINE
 
 function runTicks() {
-  console.log("ghjf");
-  document.getElementsByClassName("inactive").className = "active";
-  setInterval(perTick, 1)
+  if (canvas.className === "inactive") {
+    user.x = levels[currentLevel].startX;
+    user.y = levels[currentLevel].startY;
+    canvas.className = "active";
+    setInterval(perTick, 1)
+  };
 };
 
 function perTick() {
+  tickCount++;
   getMobile();
   getOnScreenThings();
   mobile.forEach((d) => {
     collision(d);
   });
-
   move();
   gravity();
   //  these are rendering functions
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  user.standing();
+  user.sprite;
   drawBlocks();
+  updateSprites();
 };
 
 function drawBlocks() {
@@ -104,8 +120,11 @@ function drawBlocks() {
 function collision(e) {
   onScreenThings.forEach((thing) => {
     // collisions from the left
+    console.log(e.x /*+ e.width === thing.x*/);
+
     if (e.x + e.width === thing.x && e.y >= thing.y && e.y <= thing.y + thing.height && e.y + e.height >= thing.y && e.y + e.height <= thing.y + thing.height) {
       if (levels[currentLevel].blocks.includes(thing)) {
+        // console.log(levels[currentLevel].blocks.includes(thing));
         e.walkLeft = false;
       }
       if (levels[currentLevel].enemies.includes(thing)) {
@@ -123,7 +142,7 @@ function gravity() {
 };
 
 function userDeath() {
-
+  console.log("dead");
 }
 
 function move() {
@@ -140,8 +159,22 @@ function move() {
 
 function getMobile() {
   mobile = [user];
-  (levels[currentLevel].enemies.forEach((enemy) => {
-    if(enemy.x + enemy.width > 0 && enemy.x < 801)
+  levels[currentLevel].enemies.forEach((enemy) => {
+    if (enemy.x + enemy.width > 0 && enemy.x < 801 && (enemy.walkLeft || enemy.walkRight)) {
+      mobile.push(enemy);
+    }
+  });
+};
+
+function getOnScreenThings() {
+  // mobile.forEach((thing) => {
+  //   onScreenThings.push(thing)
+  // });
+  onScreenThings = mobile.concat();
+    levels[currentLevel].blocks.forEach((block) => {
+    if (block.x + block.width > 0 && block.x < 801) {
+      onScreenThings.push(block);
+    }
   });
 }
 
@@ -173,10 +206,49 @@ function keyUp(b) {
 
 ///////////////////// SPRITES
 
-function userStanding() {
+function updateSprites() {
+  user.sprite = (user.walkLeft || user.walkRight) ? sprUserWalking() : sprUserStanding();
+  // enemies.forEach((thing) => {
+  //
+  // });
+  //
+}
+
+function sprUserStanding() {
   ctx.beginPath();
   ctx.rect(user.x, user.y, 25, 60);
   ctx.fillStyle = "black";
   ctx.fill()
   ctx.closePath();
-},
+}
+
+function sprUserWalking() {
+
+  if (tickCount % 200 === 0) {
+    sprUserWalkingFrame = (sprUserWalkingFrame === 1) ? 2 : 1
+  }
+
+  // console.log(which);
+  if (sprUserWalkingFrame === 1) {
+    ctx.beginPath();
+    ctx.rect(user.x, user.y, 25, 60);
+    ctx.fillStyle = "red";
+    ctx.fill()
+    ctx.closePath();
+  } else {
+    ctx.beginPath();
+    ctx.rect(user.x, user.y, 25, 60);
+    ctx.fillStyle = "blue";
+    ctx.fill()
+    ctx.closePath();
+  }
+}
+
+function sprEnemyOne() {
+  ctx.beginPath();
+  ctx.rect(user.x, user.y, 25, 30);
+  ctx.fillStyle = "blue";
+  ctx.fill()
+  ctx.closePath();
+}
+///////////////////// AIs
