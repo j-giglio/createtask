@@ -38,13 +38,16 @@ let levels = [
 let user = {
   x: null,
   y: null,
+  width: 25,
+  height: 60,
   walkLeft: false,
   walkRight: false,
-  touchLeft: false,
-  touchRight: false,
-  touchUp: false,
-  touchDown: false,
+  // touchLeft: false,
+  // touchRight: false,
+  // touchUp: false,
+  // touchDown: false,
   isJumping: false,
+  isCrouching: false,
   speed: 3,
   canFall: false,
   jump: function() {
@@ -119,21 +122,17 @@ function drawBlocks() {
 
 function collision(e) {
   onScreenThings.forEach((thing) => {
-    // collisions from the left
-    console.log(e.x /*+ e.width === thing.x*/);
-
-    if (e.x + e.width === thing.x && e.y >= thing.y && e.y <= thing.y + thing.height && e.y + e.height >= thing.y && e.y + e.height <= thing.y + thing.height) {
+    if (e.x < thing.x + thing.width &&
+        e.x + e.width > thing.x &&
+        e.y < e.y + thing.height && ///https://developer.mozilla.org/en-US/docs/Games/Techniques/2D_collision_detection November 4 2019
+        e.y + e.height > thing.y) {
       if (levels[currentLevel].blocks.includes(thing)) {
-        // console.log(levels[currentLevel].blocks.includes(thing));
-        e.walkLeft = false;
+        e.walkRight = false;
       }
       if (levels[currentLevel].enemies.includes(thing)) {
         userDeath()
       }
     }
-
-    // collisions from the right
-
   });
 }
 
@@ -148,12 +147,49 @@ function userDeath() {
 function move() {
   mobile.forEach((c) => {
     if (c.walkLeft) {
-      c.x -= c.speed;
+      if (c === user && c.x === 30) {
+        levels[currentLevel].blocks.forEach((block) => {
+          block.x += user.speed;
+        });
+        levels[currentLevel].enemies.forEach((enemy) => {
+          enemy.x += user.speed;
+        });
+      } else {
+        c.x -= c.speed;
+      }
     };
 
     if (c.walkRight) {
-      c.x += c.speed;
+      if (c === user && c.x + c.width === canvas.width / 2) {
+        levels[currentLevel].blocks.forEach((block) => {
+          block.x -= user.speed;
+        });
+        levels[currentLevel].enemies.forEach((enemy) => {
+          enemy.x -= user.speed;
+        });
+      } else {
+        c.x += c.speed;
+      }
     };
+
+    // if (c.walkLeft) {
+    //   c.x -= c.speed;
+    // };
+    //
+    // if (c.walkRight) {
+    //   c.x += c.speed;
+    // };
+
+    ////just for debugging
+    if (c.isJumping) {
+      c.y -= c.speed;
+    };
+
+    if (c.isCrouching) {
+      c.y += c.speed;
+    };
+
+
   });
 };
 
@@ -192,6 +228,10 @@ function keyDown(a) {
   if (a.key === "ArrowUp"){
     user.isJumping = true;
   };
+
+  if (a.key === "ArrowDown"){
+    user.isCrouching = true;
+  };
 };
 
 function keyUp(b) {
@@ -201,6 +241,14 @@ function keyUp(b) {
 
   if (b.key === "ArrowLeft"){
     user.walkLeft = false;
+  };
+
+  if (b.key === "ArrowUp"){
+    user.isJumping = false;
+  };
+
+  if (b.key === "ArrowDown"){
+    user.isCrouching = false;
   };
 }
 
@@ -231,7 +279,7 @@ function sprUserWalking() {
   // console.log(which);
   if (sprUserWalkingFrame === 1) {
     ctx.beginPath();
-    ctx.rect(user.x, user.y, 25, 60);
+    ctx.rect(user.x, user.y, user.width, user.height);
     ctx.fillStyle = "red";
     ctx.fill()
     ctx.closePath();
