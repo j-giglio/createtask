@@ -26,6 +26,26 @@ let levels = [
         color: "brown",
         onCollision: normalBlock,
       },
+      {
+        x: 0,
+        y: 480 - 200,
+        startX: 0,
+        startY: 470,
+        width: 800,
+        height: 5,
+        color: "blue",
+        onCollision: normalBlock,
+      },
+      {
+        x: -400,
+        y: 0,
+        startX: -400,
+        startY: 0,
+        width: 1800,
+        height: 66,
+        color: "black",
+        onCollision: normalBlock,
+      },
     ],
     enemies: [
       {
@@ -50,19 +70,19 @@ let user = {
   height: 62,
   walkLeft: false,
   walkRight: false,
-  canWalkLeft: true,
-  canWalkRight: true,
-  // touchLeft: false,
-  // touchRight: false,
-  // touchUp: false,
-  // touchDown: false,
-  isJumping: false,
-  isCrouching: false,
+  // canWalkLeft: true,
+  // canWalkRight: true,
   speed: 2,
-  canFall: false,
-  jump: function() {
-    user.canFall = true;
-  },
+  isJumping: false,
+  jumpSpeed: 6,
+  baseJumpSpeed: 6,
+  jumpStart: null,
+  jumpHeight: 102,
+  offGround: false,
+  isCrouching: false,
+  // jump: function() {
+  //   user.canFall = true;
+  // },
   sprite: null,
 };
 
@@ -81,8 +101,10 @@ let currentLevel = 0;
 let mobile = [user];
 let onScreenThings = [];
 let tickCount = 0;
+let gforce = 2;
 // let leftScrollMargin = 30;
 // let rightScrollMargin = canvas.width /2;
+
 //////Sprite Animation Counters
 
 let sprUserWalkingFrame = 1;
@@ -120,14 +142,18 @@ function perTick() {
   user.sprite;
   drawBlocks();
   updateSprites();
-  if (tickCount % 500 === 0) {
-    console.log(onScreenThings)
-  }
+  // if (tickCount % 200 === 0) {
+    console.log(user.offGround);
+  // }
 };
 
 function resetAttributes() {
-  user.canWalkLeft = true;
-  user.canWalkRight = true;
+  // user.canWalkLeft = true;
+  // user.canWalkRight = true;
+  mobile.forEach((c) => {
+    c.offGround = /*(e.y + e.height >= this.y && e.y + e.height <= this.y + e.speed && e.x)*/ true
+  });
+
 }
 
 function drawBlocks() {
@@ -146,29 +172,20 @@ function collision(e) {
   onScreenThings.forEach((thing) => {
     if (e.x < thing.x + thing.width &&           ///
         e.x + e.width > thing.x &&               ///
-        e.y < e.y + thing.height &&              ///https://developer.mozilla.org/en-US/docs/Games/Techniques/2D_collision_detection November 4 2019
-        e.y + e.height > thing.y &&              ///
-        thing != user) {                         ///
-      // if (levels[currentLevel].entities.blocks.includes(thing)) {
-      //   e.canWalkRight = false;
-      //   e.canWalkLeft = false;
-      //   if (e.x + e.width === thing.x + 2) {
-      //     e.x -= e.speed;
-      //   }
-      // } else {
-      //   e.canWalkRight = true;
-      //   e.canWalkLeft = true;
-      // }
-      // if (levels[currentLevel].entities.enemies.includes(thing)) {
-      //   userDeath()
-      // }
+        e.y < thing.y + thing.height &&          ///https://developer.mozilla.org/en-US/docs/Games/Techniques/2D_collision_detection November 4 2019
+        e.y + e.height > thing.y - 1 &&              ///
+        thing != user) {
       thing.onCollision(e);
     }
   });
 }
 
 function gravity() {
-
+  mobile.forEach((c) => {
+    if (c.offGround && !c.isJumping) {
+      c.y += gforce;
+    }
+  });
 };
 
 function userDeath() {
@@ -224,16 +241,17 @@ function move() {
     //   c.x += c.speed;
     // };
 
-    ////just for debugging
     if (c.isJumping) {
-      c.y -= c.speed;
+      c.y -= c.jumpSpeed
+      if (c.y - c.jumpHeight === c.jumpHeight * .85) {
+        c.jumpSpeed /= 2
+      }
     };
 
+    ////just for debugging
     if (c.isCrouching) {
       c.y += c.speed;
     };
-
-
   });
 };
 
@@ -259,39 +277,47 @@ function getOnScreenThings() {
 }
 
 function keyDown(a) {
-  if (a.key === "ArrowRight"){
+  // console.log(a);
+  if (a.code === "ArrowRight") {
     user.walkLeft = false;
     user.walkRight = true;
   };
 
-  if (a.key === "ArrowLeft"){
+  if (a.code === "ArrowLeft") {
     user.walkRight = false;
     user.walkLeft = true;
   };
 
-  if (a.key === "ArrowUp"){
+  if (a.code === "ArrowUp") {
     user.isJumping = true;
   };
 
-  if (a.key === "ArrowDown"){
+  if (a.code === "ArrowDown") {
     user.isCrouching = true;
   };
+
+  if (a.code === "Space") {
+    if (!user.isJumping){
+      user.jumpStart = user.y
+    };
+    user.isJumping = true;
+  }
 };
 
 function keyUp(b) {
-  if (b.key === "ArrowRight"){
+  if (b.code === "ArrowRight") {
     user.walkRight = false;
   };
 
-  if (b.key === "ArrowLeft"){
+  if (b.code === "ArrowLeft"){
     user.walkLeft = false;
   };
 
-  if (b.key === "ArrowUp"){
+  if (b.code === "ArrowUp") {
     user.isJumping = false;
   };
 
-  if (b.key === "ArrowDown"){
+  if (b.code === "ArrowDown") {
     user.isCrouching = false;
   };
 }
@@ -347,22 +373,31 @@ function sprEnemyOne() {
 ///////////////////// onCollision
 
 function normalBlock(e) {
-    e.canWalkRight = false;
-    e.canWalkLeft = false;
-    /////// left side of /this/
-    if (e.x + e.width <= this.x + e.speed && e.x + e.width >= this.x) {
-      e.x = this.x - 1 - e.width;
-      e.canWalkRight = true;
+  /////// left side of /this/
+  if (e.x + e.width <= this.x + e.speed && e.x + e.width >= this.x) {
+    e.x = this.x - 1 - e.width;
+  }
+
+  /////// right side of /this/
+  if (e.x >= this.x + this.width - e.speed && e.x <= this.x + this.width) {
+    e.x =  this.x + this.width + 1;
+  }
+
+  /////// underneath /this/
+  if (e.y <= this.y + this.height && e.y >= this.y + this.height - e.jumpSpeed) {
+    e.isJumping = false;
+    e.y = this.y + this.height + 1;
+  }
+
+  /////// above /this/
+  if (e.y + e.height >= this.y && e.y + e.height <= this.y + gforce) {
+    // console.log(user.isCrouching);
+    // user.isCrouching = false;
+    e.y = this.y - e.height;
+    if (e.offGround) {
+      e.offGround = false;
     }
-    /////// right side of /this/
-    // console.log(e.x + "     " + e.speed + "      " + e.width + "      " + this.x + "      " + this.width);
-    if (e.x >= this.x + this.width - e.speed && e.x <= this.x + this.width) {
-      e.x =  this.x + this.width + 1;
-      e.canWalkLeft = true;
-    }
-  // } else {
-  //   e.canWalkRight = true;
-  //   e.canWalkLeft = true;
+  }
 }
 
 ///////////////////// AIs
