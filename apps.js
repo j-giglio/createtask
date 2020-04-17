@@ -26,26 +26,16 @@ let levels = [
         color: "brown",
         onCollision: normalBlock,
       },
-      {
-        x: 0,
-        y: 480 - 200,
-        startX: 0,
-        startY: 470,
-        width: 800,
-        height: 5,
-        color: "blue",
-        onCollision: normalBlock,
-      },
-      {
-        x: -400,
-        y: 0,
-        startX: -400,
-        startY: 0,
-        width: 1800,
-        height: 66,
-        color: "black",
-        onCollision: normalBlock,
-      },
+      // {
+      //   x: -400,
+      //   y: 0,
+      //   startX: -400,
+      //   startY: 0,
+      //   width: 1800,
+      //   height: 66,
+      //   color: "black",
+      //   onCollision: normalBlock,
+      // },
     ],
     enemies: [
       {
@@ -77,12 +67,10 @@ let user = {
   jumpSpeed: 6,
   baseJumpSpeed: 6,
   jumpStart: null,
-  jumpHeight: 102,
+  jumpHeight: 192,
+  hangTime: 300,
   offGround: false,
   isCrouching: false,
-  // jump: function() {
-  //   user.canFall = true;
-  // },
   sprite: null,
 };
 
@@ -128,7 +116,7 @@ function runTicks() {
 };
 
 function perTick() {
-  tickCount++;
+  tickCount = (tickCount >= 100000001) ? 0 : tickCount + 1;
   resetAttributes();
   getMobile();
   getOnScreenThings();
@@ -137,13 +125,14 @@ function perTick() {
   });
   move();
   gravity();
-  //  these are rendering functions
+
+  //  these are rendering functions, should be put into more efficient function later
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   user.sprite;
   drawBlocks();
   updateSprites();
   // if (tickCount % 200 === 0) {
-    console.log(user.offGround);
+    // console.log(user.offGround);
   // }
 };
 
@@ -173,7 +162,7 @@ function collision(e) {
     if (e.x < thing.x + thing.width &&           ///
         e.x + e.width > thing.x &&               ///
         e.y < thing.y + thing.height &&          ///https://developer.mozilla.org/en-US/docs/Games/Techniques/2D_collision_detection November 4 2019
-        e.y + e.height > thing.y - 1 &&              ///
+        e.y + e.height > thing.y - 1 &&          ///
         thing != user) {
       thing.onCollision(e);
     }
@@ -194,7 +183,7 @@ function userDeath() {
 
 function move() {
   mobile.forEach((c) => {
-    if (c.walkLeft && c.canWalkLeft) {
+    if (c.walkLeft/* && c.canWalkLeft*/) {
       if (c === user && c.x <= 120/*leftScrollMargin*/) {
         levels[currentLevel].blocks.forEach((block) => {
           block.x += user.speed;
@@ -213,7 +202,7 @@ function move() {
       }
     };
 
-    if (c.walkRight && c.canWalkRight) {
+    if (c.walkRight/* && c.canWalkRight*/) {
       if (c === user && c.x + c.width >= 284/*rightScrollMargin*/) {
         levels[currentLevel].blocks.forEach((block) => {
           block.x -= user.speed;
@@ -242,9 +231,17 @@ function move() {
     // };
 
     if (c.isJumping) {
-      c.y -= c.jumpSpeed
       if (c.y - c.jumpHeight === c.jumpHeight * .85) {
         c.jumpSpeed /= 2
+      }
+
+      c.y -= c.jumpSpeed
+
+      if (c.jumpSpeed === 0) {
+
+      }
+      if (c.y <= c.jumpStart - c.jumpHeight) {
+        c.jumpSpeed = false;
       }
     };
 
@@ -289,7 +286,7 @@ function keyDown(a) {
   };
 
   if (a.code === "ArrowUp") {
-    user.isJumping = true;
+    // user.isJumping = true;
   };
 
   if (a.code === "ArrowDown") {
@@ -300,7 +297,9 @@ function keyDown(a) {
     if (!user.isJumping){
       user.jumpStart = user.y
     };
-    user.isJumping = true;
+    if (!user.offGround) {
+      user.isJumping = true
+    }
   }
 };
 
@@ -320,6 +319,36 @@ function keyUp(b) {
   if (b.code === "ArrowDown") {
     user.isCrouching = false;
   };
+}
+
+///////////////////// Collision
+
+function normalBlock(e) {
+  /////// left side of /this/
+  if (e.x + e.width <= this.x + e.speed && e.x + e.width >= this.x) {
+    e.x = this.x - 1 - e.width;
+  }
+
+  /////// right side of /this/
+  if (e.x >= this.x + this.width - e.speed && e.x <= this.x + this.width) {
+    e.x =  this.x + this.width + 1;
+  }
+
+  /////// underneath /this/
+  if (e.y <= this.y + this.height && e.y >= this.y + this.height - e.jumpSpeed) {
+    e.isJumping = false;
+    e.y = this.y + this.height + 1;
+  }
+
+  /////// above /this/
+  if (e.y + e.height >= this.y && e.y + e.height <= this.y + gforce) {
+    // console.log(user.isCrouching);
+    // user.isCrouching = false;
+    e.y = this.y - e.height;
+    if (e.offGround) {
+      e.offGround = false;
+    }
+  }
 }
 
 ///////////////////// SPRITES
@@ -368,36 +397,6 @@ function sprEnemyOne() {
   ctx.fillStyle = "blue";
   ctx.fill()
   ctx.closePath();
-}
-
-///////////////////// onCollision
-
-function normalBlock(e) {
-  /////// left side of /this/
-  if (e.x + e.width <= this.x + e.speed && e.x + e.width >= this.x) {
-    e.x = this.x - 1 - e.width;
-  }
-
-  /////// right side of /this/
-  if (e.x >= this.x + this.width - e.speed && e.x <= this.x + this.width) {
-    e.x =  this.x + this.width + 1;
-  }
-
-  /////// underneath /this/
-  if (e.y <= this.y + this.height && e.y >= this.y + this.height - e.jumpSpeed) {
-    e.isJumping = false;
-    e.y = this.y + this.height + 1;
-  }
-
-  /////// above /this/
-  if (e.y + e.height >= this.y && e.y + e.height <= this.y + gforce) {
-    // console.log(user.isCrouching);
-    // user.isCrouching = false;
-    e.y = this.y - e.height;
-    if (e.offGround) {
-      e.offGround = false;
-    }
-  }
 }
 
 ///////////////////// AIs
