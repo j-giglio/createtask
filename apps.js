@@ -133,7 +133,7 @@ function perTick() {
   drawBlocks();
   updateSprites();
   if (tickCount % 10 === 0) {
-    console.log(user.hangTime + " ,     " + user.hangCounter);
+    console.log(user.isJumping);
   }
 };
 
@@ -305,12 +305,15 @@ function keyDown(a) {
   };
 
   if (a.code === "Space") {
-    if (!user.isJumping){
-      user.jumpStart = user.y
+    if (!user.isJumping && !user.offGround){
+      user.jumpStart = user.y;
+      user.isJumping = true;
+      user.jumpSpeed = user.baseJumpSpeed;
+      user.hangCounter = 0;
     };
-    if (!user.offGround) {
-      user.isJumping = true
-    }
+    // if (!user.offGround) {
+    //   user.isJumping = true
+    // }
   }
 };
 
