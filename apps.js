@@ -26,16 +26,56 @@ let levels = [
         color: "brown",
         onCollision: normalBlock,
       },
-      // {
-      //   x: -400,
-      //   y: 0,
-      //   startX: -400,
-      //   startY: 0,
-      //   width: 1800,
-      //   height: 66,
-      //   color: "black",
-      //   onCollision: normalBlock,
-      // },
+      {
+        x: -400,
+        y: 0,
+        startX: -400,
+        startY: 0,
+        width: 1800,
+        height: 66,
+        color: "black",
+        onCollision: normalBlock,
+      },
+      {
+        x: 950,
+        y: 400,
+        startX: 950,
+        startY: 400,
+        width: 300,
+        height: 46,
+        color: "green",
+        onCollision: normalBlock,
+      },
+      {
+        x: 1370,
+        y: 290,
+        startX: 1370,
+        startY: 290,
+        width: 300,
+        height: 46,
+        color: "green",
+        onCollision: normalBlock,
+      },
+      {
+        x: 1720,
+        y: 235,
+        startX: 1720,
+        startY: 235,
+        width: 300,
+        height: 46,
+        color: "green",
+        onCollision: normalBlock,
+      },
+      {
+        x: 2320,
+        y: 435,
+        startX: 2220,
+        startY: 435,
+        width: 46,
+        height: 46,
+        color: "green",
+        onCollision: normalBlock,
+      },
     ],
     enemies: [
       {
@@ -67,7 +107,7 @@ let user = {
   jumpSpeed: 6,
   baseJumpSpeed: 6,
   jumpStart: null,
-  jumpHeight: 192,
+  jumpHeight: 166,
   hangTime: 25,
   hangCounter: 0,
   offGround: false,
@@ -132,9 +172,9 @@ function perTick() {
   user.sprite;
   drawBlocks();
   updateSprites();
-  if (tickCount % 10 === 0) {
-    console.log(user.isJumping);
-  }
+    // if (tickCount % 10 === 0) {
+    //   console.log(user.isJumping);
+    // }
 };
 
 function resetAttributes() {
@@ -143,20 +183,29 @@ function resetAttributes() {
   mobile.forEach((c) => {
     c.offGround = /*(e.y + e.height >= this.y && e.y + e.height <= this.y + e.speed && e.x)*/ true
   });
-
 }
 
-function drawBlocks() {
-  levels[currentLevel].blocks.forEach((block) => {
-    if (block.x <= canvas.width) {
-      ctx.beginPath();
-      ctx.rect(block.x, block.y, block.width, block.height);
-      ctx.fillStyle = block.color;
-      ctx.fill()
-      ctx.closePath();
+function getMobile() {
+  mobile = [user];
+  levels[currentLevel].enemies.forEach((enemy) => {
+    if (enemy.x + enemy.width > 0 && enemy.x < 801 && (enemy.walkLeft || enemy.walkRight)) {
+      mobile.push(enemy);
+    }
+  });
+};
+
+function getOnScreenThings() {
+  // mobile.forEach((thing) => {
+  //   onScreenThings.push(thing)
+  // });
+  onScreenThings = mobile.concat();
+    levels[currentLevel].blocks.forEach((block) => {
+    if (block.x + block.width > 0 && block.x < 801) {
+      onScreenThings.push(block);
     }
   });
 }
+
 
 function collision(e) {
   onScreenThings.forEach((thing) => {
@@ -168,18 +217,6 @@ function collision(e) {
       thing.onCollision(e);
     }
   });
-}
-
-function gravity() {
-  mobile.forEach((c) => {
-    if (c.offGround && !c.isJumping) {
-      c.y += gforce;
-    }
-  });
-};
-
-function userDeath() {
-  console.log("dead");
 }
 
 function move() {
@@ -257,82 +294,121 @@ function move() {
     };
 
     ////just for debugging
-    if (c.isCrouching) {
-      c.y += c.speed;
-    };
+    // if (c.isCrouching) {
+    //   c.y += c.;
+    // };
   });
 };
 
-function getMobile() {
-  mobile = [user];
-  levels[currentLevel].enemies.forEach((enemy) => {
-    if (enemy.x + enemy.width > 0 && enemy.x < 801 && (enemy.walkLeft || enemy.walkRight)) {
-      mobile.push(enemy);
+function gravity() {
+  mobile.forEach((c) => {
+    if (c.offGround && !c.isJumping) {
+      c.y += gforce;
     }
   });
 };
 
-function getOnScreenThings() {
-  // mobile.forEach((thing) => {
-  //   onScreenThings.push(thing)
-  // });
-  onScreenThings = mobile.concat();
-    levels[currentLevel].blocks.forEach((block) => {
-    if (block.x + block.width > 0 && block.x < 801) {
-      onScreenThings.push(block);
+function userDeath() {
+  console.log("dead");
+}
+
+function drawBlocks() {
+  levels[currentLevel].blocks.forEach((block) => {
+    if (block.x <= canvas.width) {
+      ctx.beginPath();
+      ctx.rect(block.x, block.y, block.width, block.height);
+      ctx.fillStyle = block.color;
+      ctx.fill()
+      ctx.closePath();
     }
   });
 }
 
 function keyDown(a) {
   // console.log(a);
-  if (a.code === "ArrowRight") {
-    user.walkLeft = false;
-    user.walkRight = true;
-  };
 
-  if (a.code === "ArrowLeft") {
-    user.walkRight = false;
-    user.walkLeft = true;
-  };
-
-  if (a.code === "ArrowUp") {
-    // user.isJumping = true;
-  };
-
-  if (a.code === "ArrowDown") {
-    user.isCrouching = true;
-  };
-
-  if (a.code === "Space") {
-    if (!user.isJumping && !user.offGround){
-      user.jumpStart = user.y;
-      user.isJumping = true;
-      user.jumpSpeed = user.baseJumpSpeed;
-      user.hangCounter = 0;
-    };
-    // if (!user.offGround) {
-    //   user.isJumping = true
-    // }
+  switch (a.code) {
+    case "KeyD":
+      user.walkLeft = false;
+      user.walkRight = true;
+      break;
+    case "KeyA":
+      user.walkRight = false;
+      user.walkLeft = true;;
+      break;
+    case "KeyW":
+      break;
+    case "Keys":
+      user.isCrouching = true;
+      break;
+    case "Space":
+      if (!user.isJumping && !user.offGround){
+        user.jumpStart = user.y;
+        user.isJumping = true;
+        user.jumpSpeed = user.baseJumpSpeed;
+        user.hangCounter = 0;
+      };
+      break;
   }
+
+  // if (a.code === "KeyD") {
+  //   user.walkLeft = false;
+  //   user.walkRight = true;
+  // };
+  //
+  // if (a.code === "KeyA") {
+  //   user.walkRight = false;
+  //   user.walkLeft = true;
+  // };
+  //
+  // if (a.code === "KeyW") {
+  //   // user.isJumping = true;
+  // };
+  //
+  // if (a.code === "KeyS") {
+  //   user.isCrouching = true;
+  // };
+  //
+  // if (a.code === "Space") {
+  //   if (!user.isJumping && !user.offGround){
+  //     user.jumpStart = user.y;
+  //     user.isJumping = true;
+  //     user.jumpSpeed = user.baseJumpSpeed;
+  //     user.hangCounter = 0;
+  //   };
+  //   // if (!user.offGround) {
+  //   //   user.isJumping = true
+  //   // }
+  // }
 };
 
 function keyUp(b) {
-  if (b.code === "ArrowRight") {
-    user.walkRight = false;
-  };
+  switch (b.code) {
+    case "KeyD":
+      user.walkRight = false;
+      break;
+    case "KeyA":
+      user.walkLeft = false;
+      break;
+    case "KeyW":
+      break;
+    case "Keys":
+      user.isCrouching = false;
+      break;
+  }
 
-  if (b.code === "ArrowLeft"){
-    user.walkLeft = false;
-  };
-
-  if (b.code === "ArrowUp") {
-    user.isJumping = false;
-  };
-
-  if (b.code === "ArrowDown") {
-    user.isCrouching = false;
-  };
+  // if (b.code === "KeyD") {
+  // };
+  //
+  // if (b.code === "KeyA"){
+  // };
+  //
+  // if (b.code === "KeyW") {
+  //   // user.isJumping = false;
+  // };
+  //
+  // if (b.code === "KeyS") {
+  // };
 }
 
 ///////////////////// Collision
