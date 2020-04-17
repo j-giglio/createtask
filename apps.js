@@ -68,6 +68,8 @@ let user = {
   baseJumpSpeed: 6,
   jumpStart: null,
   jumpHeight: 192,
+  hangTime: 25,
+  hangCounter: 0,
   offGround: false,
   isCrouching: false,
   sprite: null,
@@ -130,9 +132,9 @@ function perTick() {
   user.sprite;
   drawBlocks();
   updateSprites();
-  // if (tickCount % 200 === 0) {
-    // console.log(user.offGround);
-  // }
+  if (tickCount % 10 === 0) {
+    console.log(user.hangTime + " ,     " + user.hangCounter);
+  }
 };
 
 function resetAttributes() {
@@ -161,7 +163,7 @@ function collision(e) {
     if (e.x < thing.x + thing.width &&           ///
         e.x + e.width > thing.x &&               ///
         e.y < thing.y + thing.height &&          ///https://developer.mozilla.org/en-US/docs/Games/Techniques/2D_collision_detection November 4 2019
-        e.y + e.height > thing.y - 1 &&          ///
+        e.y + e.height > thing.y - 1 &&          /// -1 added to fix a gravity/collision detection bug
         thing != user) {
       thing.onCollision(e);
     }
@@ -230,12 +232,27 @@ function move() {
     // };
 
     if (c.isJumping) {
-      c.y -= c.jumpSpeed
       if (c.y - c.jumpHeight === c.jumpHeight * .85) {
         c.jumpSpeed /= 2
       }
-      if (c.y <= c.jumpStart - c.jumpHeight) {
+
+      c.y -= c.jumpSpeed
+
+      // if (c.y <= c.jumpStart - c.jumpHeight) {
+      //   c.isJumping = false;
+      // }
+
+      if (c.jumpSpeed === 0) {
+        c.hangCounter++
+      }
+
+      if (c.hangTime === c.hangCounter) {
         c.isJumping = false;
+        c.hangCounter === 0;
+      }
+
+      if (c.y <= c.jumpStart - c.jumpHeight) {
+        c.jumpSpeed = 0;
       }
     };
 
