@@ -68,7 +68,6 @@ let user = {
   baseJumpSpeed: 6,
   jumpStart: null,
   jumpHeight: 192,
-  hangTime: 300,
   offGround: false,
   isCrouching: false,
   sprite: null,
@@ -231,17 +230,12 @@ function move() {
     // };
 
     if (c.isJumping) {
+      c.y -= c.jumpSpeed
       if (c.y - c.jumpHeight === c.jumpHeight * .85) {
         c.jumpSpeed /= 2
       }
-
-      c.y -= c.jumpSpeed
-
-      if (c.jumpSpeed === 0) {
-
-      }
       if (c.y <= c.jumpStart - c.jumpHeight) {
-        c.jumpSpeed = false;
+        c.isJumping = false;
       }
     };
 
