@@ -3,7 +3,7 @@
 let levels = [
 //level one
   {
-    startX: 30,
+    startX: 120,
     startY: 408,
     blocks: [
       {
@@ -66,16 +66,6 @@ let levels = [
         color: "green",
         onCollision: normalBlock,
       },
-      {
-        x: 2320,
-        y: 435,
-        startX: 2220,
-        startY: 435,
-        width: 46,
-        height: 46,
-        color: "green",
-        onCollision: normalBlock,
-      },
     ],
     enemies: [
       {
@@ -86,7 +76,9 @@ let levels = [
       },
     ],
     // pickups: [];
-    // projectiles: [];
+    projectiles: [
+
+    ]
   },
 //level two
 ]
@@ -98,10 +90,9 @@ let user = {
   y: null,
   width: 28,
   height: 62,
-  walkLeft: false,
-  walkRight: false,
-  // canWalkLeft: true,
-  // canWalkRight: true,
+  // walkLeft: false,
+  // walkRight: false,
+  walking: 0, /// 0 is still, 1 is left, 2 is right.
   speed: 2,
   isJumping: false,
   jumpSpeed: 6,
@@ -115,8 +106,8 @@ let user = {
   sprite: null,
 };
 
-let enemy1 = {
-  sprite: 1,
+let userPellet = {
+  yee: null,
 };
 
 ///////////////////// ELEMENTS
@@ -131,8 +122,8 @@ let mobile = [user];
 let onScreenThings = [];
 let tickCount = 0;
 let gforce = 2;
-// let leftScrollMargin = 30;
-// let rightScrollMargin = canvas.width /2;
+let leftScrollMargin = 120;
+let rightScrollMargin = 284;
 
 //////Sprite Animation Counters
 
@@ -157,8 +148,9 @@ function runTicks() {
 };
 
 function perTick() {
-  tickCount = (tickCount >= 100000001) ? 0 : tickCount + 1;
+  tickCount = (tickCount >= 100000000) ? 0 : tickCount + 1;
   resetAttributes();
+  adjustCamera();
   getMobile();
   getOnScreenThings();
   mobile.forEach((d) => {
@@ -167,40 +159,51 @@ function perTick() {
   move();
   gravity();
 
-  //  these are rendering functions, should be put into more efficient function later
+  //  these are rendering functions, should be put into a more efficient function later
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   user.sprite;
   drawBlocks();
   updateSprites();
     // if (tickCount % 10 === 0) {
-    //   console.log(user.isJumping);
+    //   console.log(user.x + ", " + user.y);
     // }
 };
 
 function resetAttributes() {
-  // user.canWalkLeft = true;
-  // user.canWalkRight = true;
   mobile.forEach((c) => {
     c.offGround = /*(e.y + e.height >= this.y && e.y + e.height <= this.y + e.speed && e.x)*/ true
   });
 }
 
+function adjustCamera() {
+  if (user.x < rightScrollMargin) {
+    user.x += 2;
+    levels[currentLevel].blocks.forEach((block) => {
+      block.x += 2;
+    });
+  }
+
+  if (user.x > leftScrollMargin) {
+    user.x -= 2;
+    levels[currentLevel].blocks.forEach((block) => {
+      block.x -= 2;
+    });
+  }
+}
+
 function getMobile() {
   mobile = [user];
   levels[currentLevel].enemies.forEach((enemy) => {
-    if (enemy.x + enemy.width > 0 && enemy.x < 801 && (enemy.walkLeft || enemy.walkRight)) {
+    if (enemy.x + enemy.width > 0 && enemy.x <= canvas.width) {
       mobile.push(enemy);
     }
   });
 };
 
 function getOnScreenThings() {
-  // mobile.forEach((thing) => {
-  //   onScreenThings.push(thing)
-  // });
   onScreenThings = mobile.concat();
     levels[currentLevel].blocks.forEach((block) => {
-    if (block.x + block.width > 0 && block.x < 801) {
+    if (block.x + block.width > 0 && block.x < canvas.width) {
       onScreenThings.push(block);
     }
   });
@@ -221,8 +224,8 @@ function collision(e) {
 
 function move() {
   mobile.forEach((c) => {
-    if (c.walkLeft/* && c.canWalkLeft*/) {
-      if (c === user && c.x <= 120/*leftScrollMargin*/) {
+    if (c.walk === 1) {
+      if (c === user && c.x <= leftScrollMargin) {
         levels[currentLevel].blocks.forEach((block) => {
           block.x += user.speed;
         });
@@ -240,8 +243,8 @@ function move() {
       }
     };
 
-    if (c.walkRight/* && c.canWalkRight*/) {
-      if (c === user && c.x + c.width >= 284/*rightScrollMargin*/) {
+    if (c.walk === 2) {
+      if (c === user && c.x + c.width >= rightScrollMargin) {
         levels[currentLevel].blocks.forEach((block) => {
           block.x -= user.speed;
         });
@@ -259,14 +262,6 @@ function move() {
         c.x += c.speed;
       }
     };
-
-    // if (c.walkLeft) {
-    //   c.x -= c.speed;
-    // };
-    //
-    // if (c.walkRight) {
-    //   c.x += c.speed;
-    // };
 
     if (c.isJumping) {
       if (c.y - c.jumpHeight === c.jumpHeight * .85) {
@@ -302,7 +297,7 @@ function move() {
 
 function gravity() {
   mobile.forEach((c) => {
-    if (c.offGround && !c.isJumping) {
+    if (c.offGround && !c.isJumping && c.x >= 0 && c.x <= canvas.width) {
       c.y += gforce;
     }
   });
@@ -329,12 +324,10 @@ function keyDown(a) {
 
   switch (a.code) {
     case "KeyD":
-      user.walkLeft = false;
-      user.walkRight = true;
+      user.walk = 2;
       break;
     case "KeyA":
-      user.walkRight = false;
-      user.walkLeft = true;;
+      user.walk = 1;;
       break;
     case "KeyW":
       break;
@@ -350,45 +343,19 @@ function keyDown(a) {
       };
       break;
   }
-
-  // if (a.code === "KeyD") {
-  //   user.walkLeft = false;
-  //   user.walkRight = true;
-  // };
-  //
-  // if (a.code === "KeyA") {
-  //   user.walkRight = false;
-  //   user.walkLeft = true;
-  // };
-  //
-  // if (a.code === "KeyW") {
-  //   // user.isJumping = true;
-  // };
-  //
-  // if (a.code === "KeyS") {
-  //   user.isCrouching = true;
-  // };
-  //
-  // if (a.code === "Space") {
-  //   if (!user.isJumping && !user.offGround){
-  //     user.jumpStart = user.y;
-  //     user.isJumping = true;
-  //     user.jumpSpeed = user.baseJumpSpeed;
-  //     user.hangCounter = 0;
-  //   };
-  //   // if (!user.offGround) {
-  //   //   user.isJumping = true
-  //   // }
-  // }
 };
 
 function keyUp(b) {
   switch (b.code) {
     case "KeyD":
-      user.walkRight = false;
+      if (user.walk === 2) {
+        user.walk = 0;
+      }
       break;
     case "KeyA":
-      user.walkLeft = false;
+      if (user.walk === 1){
+        user.walk = 0;
+      }
       break;
     case "KeyW":
       break;
@@ -396,19 +363,6 @@ function keyUp(b) {
       user.isCrouching = false;
       break;
   }
-
-  // if (b.code === "KeyD") {
-  // };
-  //
-  // if (b.code === "KeyA"){
-  // };
-  //
-  // if (b.code === "KeyW") {
-  //   // user.isJumping = false;
-  // };
-  //
-  // if (b.code === "KeyS") {
-  // };
 }
 
 ///////////////////// Collision
@@ -441,10 +395,34 @@ function normalBlock(e) {
   }
 }
 
+function teleporter(e) {
+  /////// left side of /this/
+  if (e.x + e.width <= this.x + e.speed && e.x + e.width >= this.x) {
+    e.x = this.x - 1 - e.width;
+  }
+
+  /////// right side of /this/
+  if (e.x >= this.x + this.width - e.speed && e.x <= this.x + this.width) {
+    e.x =  this.x + this.width + 1;
+  }
+
+  /////// underneath /this/
+  if (e.y <= this.y + this.height && e.y >= this.y + this.height - e.jumpSpeed) {
+    e.isJumping = false;
+    e.y = this.y + this.height + 1;
+  }
+
+  /////// above /this/
+  if (e.y + e.height >= this.y && e.y + e.height <= this.y + gforce) {
+    e.x += this.deltaX
+    e.y += this.deltaY
+  }
+}
+
 ///////////////////// SPRITES
 
 function updateSprites() {
-  user.sprite = (user.walkLeft || user.walkRight) ? sprUserWalking() : sprUserStanding();
+  user.sprite = (user.walk > 0) ? sprUserWalking() : sprUserStanding();
   // enemies.forEach((thing) => {
   //
   // });
@@ -465,7 +443,6 @@ function sprUserWalking() {
     sprUserWalkingFrame = (sprUserWalkingFrame === 1) ? 2 : 1
   }
 
-  // console.log(which);
   if (sprUserWalkingFrame === 1) {
     ctx.beginPath();
     ctx.rect(user.x, user.y, user.width, user.height);
