@@ -107,7 +107,9 @@ let user = {
 };
 
 let userPellet = {
-  yee: null,
+  x: null,
+  y: null,
+
 };
 
 ///////////////////// ELEMENTS
@@ -151,8 +153,8 @@ function perTick() {
   tickCount = (tickCount >= 100000000) ? 0 : tickCount + 1;
   resetAttributes();
   adjustCamera();
-  getMobile();
-  getOnScreenThings();
+  loadEntities();
+  // getOnScreenThings();
   mobile.forEach((d) => {
     collision(d);
   });
@@ -165,7 +167,7 @@ function perTick() {
   drawBlocks();
   updateSprites();
     // if (tickCount % 10 === 0) {
-    //   console.log(user.x + ", " + user.y);
+    //   console.log(mobile);
     // }
 };
 
@@ -191,24 +193,20 @@ function adjustCamera() {
   }
 }
 
-function getMobile() {
+function loadEntities() {
   mobile = [user];
   levels[currentLevel].enemies.forEach((enemy) => {
     if (enemy.x + enemy.width > 0 && enemy.x <= canvas.width) {
       mobile.push(enemy);
     }
   });
-};
-
-function getOnScreenThings() {
   onScreenThings = mobile.concat();
-    levels[currentLevel].blocks.forEach((block) => {
+  levels[currentLevel].blocks.forEach((block) => {
     if (block.x + block.width > 0 && block.x < canvas.width) {
       onScreenThings.push(block);
     }
   });
-}
-
+};
 
 function collision(e) {
   onScreenThings.forEach((thing) => {
@@ -341,6 +339,11 @@ function keyDown(a) {
         user.jumpSpeed = user.baseJumpSpeed;
         user.hangCounter = 0;
       };
+      break;
+    case "Comma":
+      let pell = Object.create(userPellet);
+      pell.x = user.x + user.width + 2
+      levels[currentLevel].projectiles.push(pell)
       break;
   }
 };
