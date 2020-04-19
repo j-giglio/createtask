@@ -14,6 +14,7 @@ let levels = [
         width: 800,
         height: 30,
         color: "green",
+        sprite: blockPlaceHolder,
         onCollision: normalBlock,
       },
       {
@@ -24,6 +25,7 @@ let levels = [
         width: 50,
         height: 70,
         color: "brown",
+        sprite: blockPlaceHolder,
         onCollision: normalBlock,
       },
       {
@@ -34,6 +36,7 @@ let levels = [
         width: 1800,
         height: 66,
         color: "black",
+        sprite: blockPlaceHolder,
         onCollision: normalBlock,
       },
       {
@@ -44,6 +47,7 @@ let levels = [
         width: 300,
         height: 46,
         color: "green",
+        sprite: blockPlaceHolder,
         onCollision: normalBlock,
       },
       {
@@ -54,6 +58,7 @@ let levels = [
         width: 300,
         height: 46,
         color: "green",
+        sprite: blockPlaceHolder,
         onCollision: normalBlock,
       },
       {
@@ -64,7 +69,21 @@ let levels = [
         width: 300,
         height: 46,
         color: "green",
+        sprite: blockPlaceHolder,
         onCollision: normalBlock,
+      },
+      {
+        x: 2120,
+        y: 435,
+        startX: 2120,
+        startY: 435,
+        width: 46,
+        height: 46,
+        color: "green",
+        sprite: blockPlaceHolder,
+        onCollision: teleporter,
+        deltaX: -1850,
+        deltaY: -300,
       },
     ],
     enemies: [
@@ -163,9 +182,9 @@ function perTick() {
 
   //  these are rendering functions, should be put into a more efficient function later
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  user.sprite;
-  drawBlocks();
+  // user.sprite;
   updateSprites();
+  drawThings();
     // if (tickCount % 10 === 0) {
     //   console.log(mobile);
     // }
@@ -305,16 +324,20 @@ function userDeath() {
   console.log("dead");
 }
 
-function drawBlocks() {
-  levels[currentLevel].blocks.forEach((block) => {
-    if (block.x <= canvas.width) {
-      ctx.beginPath();
-      ctx.rect(block.x, block.y, block.width, block.height);
-      ctx.fillStyle = block.color;
-      ctx.fill()
-      ctx.closePath();
-    }
+function drawThings() {
+  // levels[currentLevel].blocks.forEach((block) => {
+  //   if (block.x <= canvas.width) {
+  //     ctx.beginPath();
+  //     ctx.rect(block.x, block.y, block.width, block.height);
+  //     ctx.fillStyle = block.color;
+  //     ctx.fill()
+  //     ctx.closePath();
+  //   }
+  // });
+  onScreenThings.forEach((thing) => {
+    thing.sprite()
   });
+
 }
 
 function keyDown(a) {
@@ -368,7 +391,7 @@ function keyUp(b) {
   }
 }
 
-///////////////////// Collision
+///////////////////// COLLISION
 
 function normalBlock(e) {
   /////// left side of /this/
@@ -425,7 +448,7 @@ function teleporter(e) {
 ///////////////////// SPRITES
 
 function updateSprites() {
-  user.sprite = (user.walk > 0) ? sprUserWalking() : sprUserStanding();
+  user.sprite = (user.walk > 0) ? sprUserWalking : sprUserStanding;
   // enemies.forEach((thing) => {
   //
   // });
@@ -465,6 +488,14 @@ function sprEnemyOne() {
   ctx.beginPath();
   ctx.rect(user.x, user.y, 25, 30);
   ctx.fillStyle = "blue";
+  ctx.fill()
+  ctx.closePath();
+}
+
+function blockPlaceHolder() {
+  ctx.beginPath();
+  ctx.rect(this.x, this.y, this.width, this.height);
+  ctx.fillStyle = this.color;
   ctx.fill()
   ctx.closePath();
 }
