@@ -18,6 +18,17 @@ let levels = [
         onCollision: normalBlock,
       },
       {
+        x: 0,
+        y: 212,
+        startX: 0,
+        startY: 150,
+        width: 800,
+        height: 30,
+        color: "blue",
+        sprite: blockPlaceHolder,
+        onCollision: normalBlock,
+      },
+      {
         x: 351,
         y: 400,
         startX: 351,
@@ -179,10 +190,10 @@ function perTick() {
   adjustCamera();
   loadEntities();
   // getOnScreenThings();
+  move();
   mobile.forEach((d) => {
     collision(d);
   });
-  move();
   gravity();
   //  these are rendering functions, should be put into a more efficient function later
   ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -255,59 +266,8 @@ function collision(e) {
 
 function move() {
   mobile.forEach((c) => {
-    // if (c === user && c.x <= leftScrollMargin || c.x >= rightScrollMargin) {
-    //   levels[currentLevel].blocks.forEach((block) => {
-    //     block.x += user.speed;
-    //   });
-    //   levels[currentLevel].enemies.forEach((enemy) => {
-    //     enemy.x += user.speed;
-    //   });
-    //   levels[currentLevel].projectiles.forEach((projectile) => {
-    //     projectile.x += user.speed;
-    //   });
-    // } else {
-      c.x += c.speed;
-    // }
 
-    //
-    // if (c.walk === 1) {
-    //   if (c === user && c.x <= leftScrollMargin) {
-    //     levels[currentLevel].blocks.forEach((block) => {
-    //       block.x += user.speed;
-    //     });
-    //     levels[currentLevel].enemies.forEach((enemy) => {
-    //       enemy.x += user.speed;
-    //     });
-    //     // for (let type in levels[currentLevel].entities) {
-    //     //   console.log(type[0]);
-    //     //   type.forEach((entity) => {
-    //     //     entity.x += user.speed;
-    //     //   });
-    //     // };
-    //   } else {
-    //     c.x -= c.speed;
-    //   }
-    // };
-    //
-    // if (c.walk === 2) {
-    //   if (c === user && c.x + c.width >= rightScrollMargin) {
-    //     levels[currentLevel].blocks.forEach((block) => {
-    //       block.x -= user.speed;
-    //     });
-    //
-    //     levels[currentLevel].enemies.forEach((enemy) => {
-    //       enemy.x -= user.speed;
-    //     });
-    //     // for (let type in levels[currentLevel].entities) {
-    //     //
-    //     //   type.forEach((entity) => {
-    //     //     entity.x += user.speed;
-    //     //   });
-    //     // };
-    //   } else {
-    //     c.x += c.speed;
-    //   }
-    // };
+      c.x += c.speed;
 
     if (c.isJumping) {
       if (c.y - c.jumpHeight === c.jumpHeight * .85) {
@@ -354,15 +314,6 @@ function userDeath() {
 }
 
 function drawThings() {
-  // levels[currentLevel].blocks.forEach((block) => {
-  //   if (block.x <= canvas.width) {
-  //     ctx.beginPath();
-  //     ctx.rect(block.x, block.y, block.width, block.height);
-  //     ctx.fillStyle = block.color;
-  //     ctx.fill()
-  //     ctx.closePath();
-  //   }
-  // });
   onScreenThings.forEach((thing) => {
     thing.sprite()
   });
@@ -450,8 +401,7 @@ function normalBlock(e) {
       e.offGround = false;
     }
   } else {
-    e.x = e.x - e.speed;
-    console.log(e.speed);
+    e.x -= e.speed;
   }
 }
 
