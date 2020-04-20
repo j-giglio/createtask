@@ -111,8 +111,9 @@ let user = {
   height: 62,
   // walkLeft: false,
   // walkRight: false,
+  facing: 1,
   walking: 0, /// 0 is still, 1 is left, 2 is right.
-  speed: 2,
+  speed: 0,
   isJumping: false,
   jumpSpeed: 6,
   baseJumpSpeed: 6,
@@ -128,7 +129,11 @@ let user = {
 let userPellet = {
   x: null,
   y: null,
-
+  width: 12,
+  height: 2,
+  speed: 4,
+  sprite: bluePellet,
+  onCollision: normalBlock
 };
 
 ///////////////////// ELEMENTS
@@ -179,14 +184,13 @@ function perTick() {
   });
   move();
   gravity();
-
   //  these are rendering functions, should be put into a more efficient function later
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   // user.sprite;
   updateSprites();
   drawThings();
-    // if (tickCount % 10 === 0) {
-    //   console.log(mobile);
+    // if (tickCount % 100 === 0 && tickCount <= 5000) {
+    //   console.log(onScreenThings);
     // }
 };
 
@@ -213,13 +217,20 @@ function adjustCamera() {
 }
 
 function loadEntities() {
-  mobile = [user];
+  mobile = (user.x + user.width > 0 && user.x <= canvas.width) ? [user] : [];
   levels[currentLevel].enemies.forEach((enemy) => {
     if (enemy.x + enemy.width > 0 && enemy.x <= canvas.width) {
       mobile.push(enemy);
     }
   });
+  levels[currentLevel].projectiles.forEach((projectile) => {
+    // if (projectile.x + projectile.width > 0 && projectile.x <= projectile.width) {
+      mobile.push(projectile);
+    // }
+  });
+
   onScreenThings = mobile.concat();
+
   levels[currentLevel].blocks.forEach((block) => {
     if (block.x + block.width > 0 && block.x < canvas.width) {
       onScreenThings.push(block);
@@ -235,50 +246,68 @@ function collision(e) {
         e.y + e.height > thing.y - 1 &&          /// -1 added to fix a gravity/collision detection bug
         thing != user) {
       thing.onCollision(e);
+      if (tickCount % 2000 === 0) {
+        console.log(e.x + ",  " + e.width + ",  " + "  and  " + thing.x);
+      };
     }
   });
 }
 
 function move() {
   mobile.forEach((c) => {
-    if (c.walk === 1) {
-      if (c === user && c.x <= leftScrollMargin) {
-        levels[currentLevel].blocks.forEach((block) => {
-          block.x += user.speed;
-        });
-        levels[currentLevel].enemies.forEach((enemy) => {
-          enemy.x += user.speed;
-        });
-        // for (let type in levels[currentLevel].entities) {
-        //   console.log(type[0]);
-        //   type.forEach((entity) => {
-        //     entity.x += user.speed;
-        //   });
-        // };
-      } else {
-        c.x -= c.speed;
-      }
-    };
+    // if (c === user && c.x <= leftScrollMargin || c.x >= rightScrollMargin) {
+    //   levels[currentLevel].blocks.forEach((block) => {
+    //     block.x += user.speed;
+    //   });
+    //   levels[currentLevel].enemies.forEach((enemy) => {
+    //     enemy.x += user.speed;
+    //   });
+    //   levels[currentLevel].projectiles.forEach((projectile) => {
+    //     projectile.x += user.speed;
+    //   });
+    // } else {
+      c.x += c.speed;
+    // }
 
-    if (c.walk === 2) {
-      if (c === user && c.x + c.width >= rightScrollMargin) {
-        levels[currentLevel].blocks.forEach((block) => {
-          block.x -= user.speed;
-        });
-
-        levels[currentLevel].enemies.forEach((enemy) => {
-          enemy.x -= user.speed;
-        });
-        // for (let type in levels[currentLevel].entities) {
-        //
-        //   type.forEach((entity) => {
-        //     entity.x += user.speed;
-        //   });
-        // };
-      } else {
-        c.x += c.speed;
-      }
-    };
+    //
+    // if (c.walk === 1) {
+    //   if (c === user && c.x <= leftScrollMargin) {
+    //     levels[currentLevel].blocks.forEach((block) => {
+    //       block.x += user.speed;
+    //     });
+    //     levels[currentLevel].enemies.forEach((enemy) => {
+    //       enemy.x += user.speed;
+    //     });
+    //     // for (let type in levels[currentLevel].entities) {
+    //     //   console.log(type[0]);
+    //     //   type.forEach((entity) => {
+    //     //     entity.x += user.speed;
+    //     //   });
+    //     // };
+    //   } else {
+    //     c.x -= c.speed;
+    //   }
+    // };
+    //
+    // if (c.walk === 2) {
+    //   if (c === user && c.x + c.width >= rightScrollMargin) {
+    //     levels[currentLevel].blocks.forEach((block) => {
+    //       block.x -= user.speed;
+    //     });
+    //
+    //     levels[currentLevel].enemies.forEach((enemy) => {
+    //       enemy.x -= user.speed;
+    //     });
+    //     // for (let type in levels[currentLevel].entities) {
+    //     //
+    //     //   type.forEach((entity) => {
+    //     //     entity.x += user.speed;
+    //     //   });
+    //     // };
+    //   } else {
+    //     c.x += c.speed;
+    //   }
+    // };
 
     if (c.isJumping) {
       if (c.y - c.jumpHeight === c.jumpHeight * .85) {
@@ -345,10 +374,13 @@ function keyDown(a) {
 
   switch (a.code) {
     case "KeyD":
-      user.walk = 2;
+      // user.walk = 2;
+      user.speed = 2;
+      user.facing = 1;
       break;
     case "KeyA":
-      user.walk = 1;;
+      user.speed = -2;
+      user.facing = -1;
       break;
     case "KeyW":
       break;
@@ -366,6 +398,8 @@ function keyDown(a) {
     case "Comma":
       let pell = Object.create(userPellet);
       pell.x = user.x + user.width + 2
+      pell.y = user.y + 10;
+      pell.speed *= user.facing;
       levels[currentLevel].projectiles.push(pell)
       break;
   }
@@ -374,14 +408,14 @@ function keyDown(a) {
 function keyUp(b) {
   switch (b.code) {
     case "KeyD":
-      if (user.walk === 2) {
-        user.walk = 0;
-      }
+      // if (user.walk === 2) {
+        user.speed = 0;
+      // }
       break;
     case "KeyA":
-      if (user.walk === 1){
-        user.walk = 0;
-      }
+      // if (user.walk === 1){
+        user.speed = 0;
+      // }
       break;
     case "KeyW":
       break;
@@ -394,30 +428,30 @@ function keyUp(b) {
 ///////////////////// COLLISION
 
 function normalBlock(e) {
-  /////// left side of /this/
-  if (e.x + e.width <= this.x + e.speed && e.x + e.width >= this.x) {
-    e.x = this.x - 1 - e.width;
-  }
-
-  /////// right side of /this/
-  if (e.x >= this.x + this.width - e.speed && e.x <= this.x + this.width) {
-    e.x =  this.x + this.width + 1;
-  }
+  // /////// left side of /this/
+  // if (e.x - e.width <= this.x/* + e.speed*/ && e.x - e.width >= this.x) {
+  //   e.x = this.x - 1 - e.width;
+  // }
+  //
+  // /////// right side of /this/
+  // if (e.x >= this.x + this.width/* + e.speed*/ && e.x <= this.x + this.width) {
+  //   e.x =  this.x + this.width + 1;
+  // }
 
   /////// underneath /this/
   if (e.y <= this.y + this.height && e.y >= this.y + this.height - e.jumpSpeed) {
     e.isJumping = false;
     e.y = this.y + this.height + 1;
-  }
-
-  /////// above /this/
-  if (e.y + e.height >= this.y && e.y + e.height <= this.y + gforce) {
+  } else if (e.y + e.height >= this.y && e.y + e.height <= this.y + gforce) { /////// above /this/
     // console.log(user.isCrouching);
     // user.isCrouching = false;
     e.y = this.y - e.height;
     if (e.offGround) {
       e.offGround = false;
     }
+  } else {
+    e.x = e.x - e.speed;
+    console.log(e.speed);
   }
 }
 
@@ -448,7 +482,7 @@ function teleporter(e) {
 ///////////////////// SPRITES
 
 function updateSprites() {
-  user.sprite = (user.walk > 0) ? sprUserWalking : sprUserStanding;
+  user.sprite = (user.speed !== 0) ? sprUserWalking : sprUserStanding;
   // enemies.forEach((thing) => {
   //
   // });
@@ -461,6 +495,19 @@ function sprUserStanding() {
   ctx.fillStyle = "black";
   ctx.fill()
   ctx.closePath();
+  if (user.facing === -1) {
+    ctx.beginPath();
+    ctx.rect(user.x, user.y, user.width /4, user.height);
+    ctx.fillStyle = "gray";
+    ctx.fill()
+    ctx.closePath();
+  } else {
+    ctx.beginPath();
+    ctx.rect(user.x + user.width, user.y, -1 * user.width /4, user.height);
+    ctx.fillStyle = "gray";
+    ctx.fill()
+    ctx.closePath();
+  }
 }
 
 function sprUserWalking() {
@@ -475,12 +522,38 @@ function sprUserWalking() {
     ctx.fillStyle = "red";
     ctx.fill()
     ctx.closePath();
+    if (user.facing === -1) {
+      ctx.beginPath();
+      ctx.rect(user.x, user.y, user.width /4, user.height);
+      ctx.fillStyle = "blue";
+      ctx.fill()
+      ctx.closePath();
+    } else {
+      ctx.beginPath();
+      ctx.rect(user.x + user.width, user.y, -1 * user.width /4, user.height);
+      ctx.fillStyle = "blue";
+      ctx.fill()
+      ctx.closePath();
+    }
   } else {
     ctx.beginPath();
     ctx.rect(user.x, user.y, user.width, user.height);
     ctx.fillStyle = "blue";
     ctx.fill()
     ctx.closePath();
+    if (user.facing -1) {
+      ctx.beginPath();
+      ctx.rect(user.x, user.y, user.width /4, user.height);
+      ctx.fillStyle = "red";
+      ctx.fill()
+      ctx.closePath();
+    } else {
+      ctx.beginPath();
+      ctx.rect(user.x + user.width, user.y, -1 * user.width /4, user.height);
+      ctx.fillStyle = "red";
+      ctx.fill()
+      ctx.closePath();
+    }
   }
 }
 
@@ -496,6 +569,14 @@ function blockPlaceHolder() {
   ctx.beginPath();
   ctx.rect(this.x, this.y, this.width, this.height);
   ctx.fillStyle = this.color;
+  ctx.fill()
+  ctx.closePath();
+}
+
+function bluePellet() {
+  ctx.beginPath();
+  ctx.rect(this.x, this.y, 6, 2);
+  ctx.fillStyle = "blue";
   ctx.fill()
   ctx.closePath();
 }
