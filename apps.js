@@ -17,17 +17,17 @@ let levels = [
         sprite: blockPlaceHolder,
         onCollision: normalBlock,
       },
-      {
-        x: 0,
-        y: 212,
-        startX: 0,
-        startY: 150,
-        width: 800,
-        height: 30,
-        color: "blue",
-        sprite: blockPlaceHolder,
-        onCollision: normalBlock,
-      },
+      // {
+      //   x: 0,
+      //   y: 265,
+      //   startX: 0,
+      //   startY: 265,
+      //   width: 800,
+      //   height: 30,
+      //   color: "blue",
+      //   sprite: blockPlaceHolder,
+      //   onCollision: normalBlock,
+      // },
       {
         x: 351,
         y: 400,
@@ -180,7 +180,7 @@ function runTicks() {
     user.x = levels[currentLevel].startX;
     user.y = levels[currentLevel].startY;
     canvas.className = "active";
-    setInterval(perTick, 1)
+    setInterval(perTick, 1);
   };
 };
 
@@ -257,9 +257,6 @@ function collision(e) {
         e.y + e.height > thing.y - 1 &&          /// -1 added to fix a gravity/collision detection bug
         thing != user) {
       thing.onCollision(e);
-      if (tickCount % 2000 === 0) {
-        console.log(e.x + ",  " + e.width + ",  " + "  and  " + thing.x);
-      };
     }
   });
 }
@@ -322,37 +319,38 @@ function drawThings() {
 
 function keyDown(a) {
   // console.log(a);
-
-  switch (a.code) {
-    case "KeyD":
-      // user.walk = 2;
-      user.speed = 2;
-      user.facing = 1;
-      break;
-    case "KeyA":
-      user.speed = -2;
-      user.facing = -1;
-      break;
-    case "KeyW":
-      break;
-    case "Keys":
-      user.isCrouching = true;
-      break;
-    case "Space":
-      if (!user.isJumping && !user.offGround){
-        user.jumpStart = user.y;
-        user.isJumping = true;
-        user.jumpSpeed = user.baseJumpSpeed;
-        user.hangCounter = 0;
-      };
-      break;
-    case "Comma":
-      let pell = Object.create(userPellet);
-      pell.x = user.x + user.width + 2
-      pell.y = user.y + 10;
-      pell.speed *= user.facing;
-      levels[currentLevel].projectiles.push(pell)
-      break;
+  if (canvas.className === "active") {
+    switch (a.code) {
+      case "KeyD":
+        // user.walk = 2;
+        user.speed = 2;
+        user.facing = 1;
+        break;
+      case "KeyA":
+        user.speed = -2;
+        user.facing = -1;
+        break;
+      case "KeyW":
+        break;
+      case "Keys":
+        user.isCrouching = true;
+        break;
+      case "Space":
+        if (!user.isJumping && !user.offGround){
+          user.jumpStart = user.y;
+          user.isJumping = true;
+          user.jumpSpeed = user.baseJumpSpeed;
+          user.hangCounter = 0;
+        };
+        break;
+      case "Comma":
+        let pell = Object.create(userPellet);
+        pell.x = user.x + user.width + 2
+        pell.y = user.y + 10;
+        pell.speed *= user.facing;
+        levels[currentLevel].projectiles.push(pell)
+        break;
+    }
   }
 };
 
@@ -379,20 +377,10 @@ function keyUp(b) {
 ///////////////////// COLLISION
 
 function normalBlock(e) {
-  // /////// left side of /this/
-  // if (e.x - e.width <= this.x/* + e.speed*/ && e.x - e.width >= this.x) {
-  //   e.x = this.x - 1 - e.width;
-  // }
-  //
-  // /////// right side of /this/
-  // if (e.x >= this.x + this.width/* + e.speed*/ && e.x <= this.x + this.width) {
-  //   e.x =  this.x + this.width + 1;
-  // }
-
   /////// underneath /this/
   if (e.y <= this.y + this.height && e.y >= this.y + this.height - e.jumpSpeed) {
     e.isJumping = false;
-    e.y = this.y + this.height + 1;
+    e.y -= this.y + this.height + 3;
   } else if (e.y + e.height >= this.y && e.y + e.height <= this.y + gforce) { /////// above /this/
     // console.log(user.isCrouching);
     // user.isCrouching = false;
@@ -400,32 +388,21 @@ function normalBlock(e) {
     if (e.offGround) {
       e.offGround = false;
     }
-  } else {
+  } else/* if (!user.isJumping && user.speed === 0)*/ {
     e.x -= e.speed;
   }
 }
 
 function teleporter(e) {
-  /////// left side of /this/
-  if (e.x + e.width <= this.x + e.speed && e.x + e.width >= this.x) {
-    e.x = this.x - 1 - e.width;
-  }
-
-  /////// right side of /this/
-  if (e.x >= this.x + this.width - e.speed && e.x <= this.x + this.width) {
-    e.x =  this.x + this.width + 1;
-  }
-
   /////// underneath /this/
   if (e.y <= this.y + this.height && e.y >= this.y + this.height - e.jumpSpeed) {
     e.isJumping = false;
     e.y = this.y + this.height + 1;
-  }
-
-  /////// above /this/
-  if (e.y + e.height >= this.y && e.y + e.height <= this.y + gforce) {
-    e.x += this.deltaX
-    e.y += this.deltaY
+  } else if (e.y + e.height >= this.y && e.y + e.height <= this.y + gforce) { /////// above /this/
+      e.x += this.deltaX
+      e.y += this.deltaY
+  } else /* if (!user.isJumping && user.speed === 0)*/ {
+    e.x -= e.speed;
   }
 }
 
