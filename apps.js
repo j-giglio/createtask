@@ -3,7 +3,7 @@
 let levels = [
 //level one
   {
-    startX: 120,
+    startX: 124,
     startY: 408,
     blocks: [
       {
@@ -28,17 +28,17 @@ let levels = [
       //   sprite: blockPlaceHolder,
       //   onCollision: normalBlock,
       // },
-      {
-        x: 351,
-        y: 400,
-        startX: 351,
-        startY: 400,
-        width: 50,
-        height: 70,
-        color: "brown",
-        sprite: blockPlaceHolder,
-        onCollision: normalBlock,
-      },
+      // {
+      //   x: 351,
+      //   y: 400,
+      //   startX: 351,
+      //   startY: 400,
+      //   width: 50,
+      //   height: 70,
+      //   color: "brown",
+      //   sprite: blockPlaceHolder,
+      //   onCollision: normalBlock,
+      // },
       {
         x: -400,
         y: 0,
@@ -120,11 +120,12 @@ let user = {
   y: null,
   width: 28,
   height: 62,
-  // walkLeft: false,
-  // walkRight: false,
   facing: 1,
   walking: 0, /// 0 is still, 1 is left, 2 is right.
   speed: 0,
+  speedCap: 2,
+  speedCounter: 0,
+  accelRate: 50,
   isJumping: false,
   jumpSpeed: 6,
   baseJumpSpeed: 6,
@@ -189,19 +190,19 @@ function perTick() {
   resetAttributes();
   adjustCamera();
   loadEntities();
-  // getOnScreenThings();
+  if (user.speedCounter > 0) {
+    user.speedCounter++
+  }
   move();
   mobile.forEach((d) => {
     collision(d);
   });
   gravity();
-  //  these are rendering functions, should be put into a more efficient function later
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  // user.sprite;
   updateSprites();
   drawThings();
     // if (tickCount % 100 === 0 && tickCount <= 5000) {
-    //   console.log(onScreenThings);
+      // console.log(user.speed);
     // }
 };
 
@@ -212,19 +213,29 @@ function resetAttributes() {
 }
 
 function adjustCamera() {
-  if (user.x < rightScrollMargin) {
-    user.x += 2;
+  if (user.x > rightScrollMargin || user.x < leftScrollMargin) {
+    let add = /*(user.speed === 0) ? 2 : */0 - user.speed;
+    user.x += add;
     levels[currentLevel].blocks.forEach((block) => {
-      block.x += 2;
+      block.x += add;
     });
   }
 
-  if (user.x > leftScrollMargin) {
-    user.x -= 2;
-    levels[currentLevel].blocks.forEach((block) => {
-      block.x -= 2;
-    });
-  }
+  // if (user.x < leftScrollMargin) {
+  //   let add = (user.speed === 0) ? 2 : 0 - user.speed;
+  //   user.x += add;
+  //   levels[currentLevel].blocks.forEach((block) => {
+  //     block.x -= add;
+  //   });
+  // }
+  //
+  // if (user.x < rightScrollMargin || user.x > leftScrollMargin) {
+  //   let add = (user.speed === 0) ? 2 : 0 - user.speed;
+  //     user.x += add;
+  //     levels[currentLevel].blocks.forEach((block) => {
+  //       block.x += add;
+  //     });
+  // }
 }
 
 function loadEntities() {
@@ -263,20 +274,16 @@ function collision(e) {
 
 function move() {
   mobile.forEach((c) => {
-
-      c.x += c.speed;
+    // if (user.speedCounter > 0 && user.speedCounter % user.accelRate === 0 && user.speed <= user.speedCap) {
+    //   user.speed++
+    // }
+    c.x += c.speed;
 
     if (c.isJumping) {
-      if (c.y - c.jumpHeight === c.jumpHeight * .85) {
-        c.jumpSpeed /= 2
-      }
-
-      c.y -= c.jumpSpeed
-
-      // if (c.y <= c.jumpStart - c.jumpHeight) {
-      //   c.isJumping = false;
+      // if (c.y - c.jumpHeight === c.jumpHeight * .85) {
+      //   c.jumpSpeed /= 2
       // }
-
+      c.y -= c.jumpSpeed
       if (c.jumpSpeed === 0) {
         c.hangCounter++
       }
@@ -292,6 +299,7 @@ function move() {
     };
 
     ////just for debugging
+
     // if (c.isCrouching) {
     //   c.y += c.;
     // };
@@ -318,23 +326,29 @@ function drawThings() {
 }
 
 function keyDown(a) {
-  // console.log(a);
+  console.log(a);
   if (canvas.className === "active") {
     switch (a.code) {
       case "KeyD":
-        // user.walk = 2;
-        user.speed = 2;
+        // if (user.speedCounter === 1) {
+        //   user.speedCounter =
+        // }
+        user.speed = 2
         user.facing = 1;
         break;
+
       case "KeyA":
         user.speed = -2;
         user.facing = -1;
         break;
+
       case "KeyW":
         break;
-      case "Keys":
+
+      case "KeyS":
         user.isCrouching = true;
         break;
+
       case "Space":
         if (!user.isJumping && !user.offGround){
           user.jumpStart = user.y;
@@ -343,6 +357,7 @@ function keyDown(a) {
           user.hangCounter = 0;
         };
         break;
+
       case "Comma":
         let pell = Object.create(userPellet);
         pell.x = user.x + user.width + 2
@@ -357,19 +372,19 @@ function keyDown(a) {
 function keyUp(b) {
   switch (b.code) {
     case "KeyD":
-      // if (user.walk === 2) {
-        user.speed = 0;
-      // }
+      user.speed = 0;
+      user.speedCounter = 1;
       break;
     case "KeyA":
-      // if (user.walk === 1){
         user.speed = 0;
-      // }
       break;
     case "KeyW":
       break;
-    case "Keys":
+    case "KeyS":
       user.isCrouching = false;
+      break;
+    case "Space":
+      user.jumpSpeed = 0;
       break;
   }
 }
