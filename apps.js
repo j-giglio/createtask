@@ -213,29 +213,13 @@ function resetAttributes() {
 }
 
 function adjustCamera() {
-  if (user.x > rightScrollMargin || user.x < leftScrollMargin) {
-    let add = /*(user.speed === 0) ? 2 : */0 - user.speed;
+  if (user.x >= rightScrollMargin || user.x <= leftScrollMargin) {
+    add = (user.speed === 0 && user.x >= rightScrollMargin) ? -2 : (user.speed === 0 && user.x <= leftScrollMargin) ? 2 : 0 - user.speed;
     user.x += add;
     levels[currentLevel].blocks.forEach((block) => {
       block.x += add;
     });
   }
-
-  // if (user.x < leftScrollMargin) {
-  //   let add = (user.speed === 0) ? 2 : 0 - user.speed;
-  //   user.x += add;
-  //   levels[currentLevel].blocks.forEach((block) => {
-  //     block.x -= add;
-  //   });
-  // }
-  //
-  // if (user.x < rightScrollMargin || user.x > leftScrollMargin) {
-  //   let add = (user.speed === 0) ? 2 : 0 - user.speed;
-  //     user.x += add;
-  //     levels[currentLevel].blocks.forEach((block) => {
-  //       block.x += add;
-  //     });
-  // }
 }
 
 function loadEntities() {
