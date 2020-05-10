@@ -7,53 +7,90 @@ let levels = [
     startY: 408,
     blocks: [
       {
-        x: 0,
+        x: 100,
         y: 470,
         startX: 0,
         startY: 470,
-        width: 800,
-        height: 30,
+        width: 300,
+        height: 50,
         color: "green",
         sprite: blockPlaceHolder,
         onCollision: normalBlock,
       },
+      // {
+      //   x: -400,
+      //   y: 0,
+      //   startX: -400,
+      //   startY: 0,
+      //   width: 1800,
+      //   height: 66,
+      //   color: "black",
+      //   sprite: blockPlaceHolder,
+      //   onCollision: normalBlock,
+      // },
       {
-        x: -400,
-        y: 0,
-        startX: -400,
-        startY: 0,
-        width: 1800,
-        height: 66,
-        color: "black",
-        sprite: blockPlaceHolder,
-        onCollision: normalBlock,
-      },
-      {
-        x: 950,
+        x: 550,
         y: 400,
-        startX: 950,
+        startX: 550,
         startY: 400,
         width: 300,
-        height: 46,
+        height: 50,
         color: "green",
         sprite: blockPlaceHolder,
         onCollision: normalBlock,
       },
       {
-        x: 1370,
+        x: 970,
         y: 290,
-        startX: 1370,
+        startX: 970,
         startY: 290,
         width: 300,
-        height: 46,
+        height: 50,
+        color: "green",
+        sprite: blockPlaceHolder,
+        onCollision: normalBlock,
+      },
+
+
+      {
+        x: 1420,
+        y: 290,
+        startX: 1320,
+        startY: 235,
+        width: 50,
+        height: 50,
         color: "green",
         sprite: blockPlaceHolder,
         onCollision: normalBlock,
       },
       {
-        x: 1720,
+        x: 1620,
+        y: 290,
+        startX: 1320,
+        startY: 235,
+        width: 50,
+        height: 50,
+        color: "green",
+        sprite: blockPlaceHolder,
+        onCollision: normalBlock,
+      },
+      {
+        x: 1820,
+        y: 290,
+        startX: 1320,
+        startY: 235,
+        width: 50,
+        height: 50,
+        color: "green",
+        sprite: blockPlaceHolder,
+        onCollision: normalBlock,
+      },
+
+
+      {
+        x: 2070,
         y: 235,
-        startX: 1720,
+        startX: 1320,
         startY: 235,
         width: 300,
         height: 46,
@@ -62,16 +99,16 @@ let levels = [
         onCollision: normalBlock,
       },
       {
-        x: 2120,
+        x: 2520,
         y: 435,
-        startX: 2120,
+        startX: 1720,
         startY: 435,
-        width: 46,
+        width: 50,
         height: 46,
         color: "green",
         sprite: blockPlaceHolder,
         onCollision: teleporter,
-        deltaX: -1850,
+        deltaX: -1500,
         deltaY: -300,
       },
     ],
@@ -90,8 +127,8 @@ let user = {
   speedCap: 10,
   speedCounter: 0,
   isJumping: false,
-  jumpSpeed: 0,
-  baseJumpSpeed: 20,
+  ySpeed: 0,
+  jumpSpeed: 20,
   jumpStart: null,
   jumpHeight: 166,
   hangTime: 10,
@@ -112,9 +149,11 @@ let currentLevel = 0;
 let mobile = [user];
 let onScreenThings = [];
 let tickCount = 0;
-let gforce = 6;
+let gforce = 8;
 let leftScrollMargin = 120;
 let rightScrollMargin = 284;
+let topScrollMargin = 100;
+let bottomScrollMargin = 420 - user.height;
 
 //////Sprite Animation Counters
 
@@ -141,17 +180,19 @@ function runTicks() {
 function perTick() {
   tickCount = (tickCount >= 100000000) ? 0 : tickCount + 1;
   resetAttributes();
-  adjustCamera();
   loadEntities();
   move();
+  gravity();
   mobile.forEach((d) => {
     collision(d);
   });
-  gravity();
+  adjustCamera();
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   updateSprites();
   drawThings();
-  window.requestAnimationFrame(perTick);
+  if (canvas.className === "active") {
+    window.requestAnimationFrame(perTick);
+  }
 };
 
 function resetAttributes() {
@@ -162,12 +203,19 @@ function resetAttributes() {
 
 function adjustCamera() {
   if (user.x >= rightScrollMargin || user.x <= leftScrollMargin) {
-    add = (user.speed === 0 && user.x >= rightScrollMargin) ? -user.speedCap : (user.speed === 0 && user.x <= leftScrollMargin) ? user.speedCap : -user.speed;
+    let add = (user.speed === 0 && user.x >= rightScrollMargin) ? -user.speedCap : (user.speed === 0 && user.x <= leftScrollMargin) ? user.speedCap : -user.speed;
     user.x += add;
     levels[currentLevel].blocks.forEach((block) => {
       block.x += add;
     });
   }
+  // if (user.y >= bottomScrollMargin || user.y <= topScrollMargin) {
+  //   let add = (user.ySpeed === 0 && user.y >= bottomScrollMargin) ? -user.speedCap : (user.ySpeed === 0 && user.y <= topScrollMargin) ? user.speedCap : -user.ySpeed;
+  //   user.y += add;
+  //   levels[currentLevel].blocks.forEach((block) => {
+  //     block.y += add;
+  //   });
+  // }
 }
 
 function loadEntities() {
@@ -183,8 +231,8 @@ function loadEntities() {
 function collision(e) {
   onScreenThings.forEach((thing) => {
     if (e.x < thing.x + thing.width &&           ///
-        e.x + e.width > thing.x &&               ///
-        e.y < thing.y + thing.height &&          ///https://developer.mozilla.org/en-US/docs/Games/Techniques/2D_collision_detection November 4 2019
+        e.x + e.width > thing.x &&               ///https://developer.mozilla.org/en-US/docs/Games/Techniques/2D_collision_detection November 4 2019
+        e.y < thing.y + thing.height &&          ///
         e.y + e.height > thing.y - 1 &&          /// -1 added to fix a gravity/collision detection bug
         thing != user) {
       thing.onCollision(e);
@@ -197,8 +245,8 @@ function move() {
     c.x += c.speed;
 
     if (c.isJumping) {
-      c.y -= c.jumpSpeed
-      if (c.jumpSpeed === 0) {
+      c.y -= c.ySpeed
+      if (c.ySpeed === 0) {
         c.hangCounter++
       }
 
@@ -208,7 +256,7 @@ function move() {
       }
 
       if (c.y <= c.jumpStart - c.jumpHeight) {
-        c.jumpSpeed = 0;
+        c.ySpeed = 0;
       }
     };
   });
@@ -257,9 +305,12 @@ function keyDown(a) {
         if (!user.isJumping && !user.offGround){
           user.jumpStart = user.y;
           user.isJumping = true;
-          user.jumpSpeed = user.baseJumpSpeed;
+          user.ySpeed = user.jumpSpeed;
           user.hangCounter = 0;
         };
+        break;
+      case "KeyP":
+        canvas.className = (canvas.className === "active") ? "inactive" : "active";
         break;
     }
   }
@@ -280,7 +331,7 @@ function keyUp(b) {
       user.isCrouching = false;
       break;
     case "Space":
-      user.jumpSpeed = 0;
+      user.ySpeed = 0;
       break;
   }
 }
@@ -289,7 +340,7 @@ function keyUp(b) {
 
 function normalBlock(e) {
   /////// underneath /this/
-  if (e.y <= this.y + this.height && e.y >= this.y + this.height - e.jumpSpeed) {
+  if (e.y <= this.y + this.height && e.y >= this.y + this.height - e.ySpeed) {
     e.isJumping = false;
     e.y -= this.y + this.height + 3;
   } else if (e.y + e.height >= this.y && e.y + e.height <= this.y + gforce) { /////// above /this/
@@ -304,7 +355,7 @@ function normalBlock(e) {
 
 function teleporter(e) {
   /////// underneath /this/
-  if (e.y <= this.y + this.height && e.y >= this.y + this.height - e.jumpSpeed) {
+  if (e.y <= this.y + this.height && e.y >= this.y + this.height - e.ySpeed) {
     e.isJumping = false;
     e.y = this.y + this.height + 1;
   } else if (e.y + e.height >= this.y && e.y + e.height <= this.y + gforce) { /////// above /this/
@@ -401,14 +452,6 @@ function blockPlaceHolder() {
   ctx.beginPath();
   ctx.rect(this.x, this.y, this.width, this.height);
   ctx.fillStyle = this.color;
-  ctx.fill()
-  ctx.closePath();
-}
-
-function bluePellet() {
-  ctx.beginPath();
-  ctx.rect(this.x, this.y, 6, 2);
-  ctx.fillStyle = "blue";
   ctx.fill()
   ctx.closePath();
 }
