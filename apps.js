@@ -1,33 +1,24 @@
+//https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API/Tutorial/Basic_usage Dec. 9 2019 canvas api used throughout
+//https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API/Tutorial/Applying_styles_and_colors Sept. 20 2019 used throughout
 ///////////////////// LEVELS
 
 let levels = [
 //level one
   {
-    startX: 124,
+    startX: 200,
     startY: 408,
     blocks: [
       {
         x: 100,
         y: 470,
-        startX: 0,
+        startX: 100,
         startY: 470,
         width: 300,
         height: 50,
-        color: "green",
+        color: "red",
         sprite: blockPlaceHolder,
         onCollision: normalBlock,
       },
-      // {
-      //   x: -400,
-      //   y: 0,
-      //   startX: -400,
-      //   startY: 0,
-      //   width: 1800,
-      //   height: 66,
-      //   color: "black",
-      //   sprite: blockPlaceHolder,
-      //   onCollision: normalBlock,
-      // },
       {
         x: 550,
         y: 400,
@@ -54,8 +45,8 @@ let levels = [
 
       {
         x: 1420,
-        y: 290,
-        startX: 1320,
+        y: 235,
+        startX: 1420,
         startY: 235,
         width: 50,
         height: 50,
@@ -65,8 +56,8 @@ let levels = [
       },
       {
         x: 1620,
-        y: 290,
-        startX: 1320,
+        y: 235,
+        startX: 1620,
         startY: 235,
         width: 50,
         height: 50,
@@ -76,8 +67,8 @@ let levels = [
       },
       {
         x: 1820,
-        y: 290,
-        startX: 1320,
+        y: 235,
+        startX: 1820,
         startY: 235,
         width: 50,
         height: 50,
@@ -90,7 +81,7 @@ let levels = [
       {
         x: 2070,
         y: 235,
-        startX: 1320,
+        startX: 2070,
         startY: 235,
         width: 300,
         height: 46,
@@ -101,14 +92,14 @@ let levels = [
       {
         x: 2520,
         y: 435,
-        startX: 1720,
+        startX: 2520,
         startY: 435,
         width: 50,
         height: 46,
         color: "green",
         sprite: blockPlaceHolder,
         onCollision: teleporter,
-        deltaX: -1500,
+        deltaX: -2350,
         deltaY: -300,
       },
     ],
@@ -128,7 +119,7 @@ let user = {
   speedCounter: 0,
   isJumping: false,
   ySpeed: 0,
-  jumpSpeed: 20,
+  jumpSpeed: 26,
   jumpStart: null,
   jumpHeight: 166,
   hangTime: 10,
@@ -150,10 +141,12 @@ let mobile = [user];
 let onScreenThings = [];
 let tickCount = 0;
 let gforce = 8;
-let leftScrollMargin = 120;
+let leftScrollMargin = 196;
 let rightScrollMargin = 284;
 let topScrollMargin = 100;
 let bottomScrollMargin = 420 - user.height;
+let leftPressed = false;
+let rightPressed = false;
 
 //////Sprite Animation Counters
 
@@ -173,12 +166,12 @@ function runTicks() {
     user.x = levels[currentLevel].startX;
     user.y = levels[currentLevel].startY;
     canvas.className = "active";
-    window.requestAnimationFrame(perTick);
+    window.requestAnimationFrame(perTick); //https://developer.mozilla.org/en-US/docs/Web/API/window/requestAnimationFrame Feb 22 2020
   };
 };
 
 function perTick() {
-  tickCount = (tickCount >= 100000000) ? 0 : tickCount + 1;
+  tickCount = (tickCount >= Math.MAX_SAFE_INTEGER) ? 0 : tickCount + 1;
   resetAttributes();
   loadEntities();
   move();
@@ -191,7 +184,7 @@ function perTick() {
   updateSprites();
   drawThings();
   if (canvas.className === "active") {
-    window.requestAnimationFrame(perTick);
+    window.requestAnimationFrame(perTick); //https://developer.mozilla.org/en-US/docs/Web/API/window/requestAnimationFrame Feb 22 2020
   }
 };
 
@@ -209,13 +202,6 @@ function adjustCamera() {
       block.x += add;
     });
   }
-  // if (user.y >= bottomScrollMargin || user.y <= topScrollMargin) {
-  //   let add = (user.ySpeed === 0 && user.y >= bottomScrollMargin) ? -user.speedCap : (user.ySpeed === 0 && user.y <= topScrollMargin) ? user.speedCap : -user.ySpeed;
-  //   user.y += add;
-  //   levels[currentLevel].blocks.forEach((block) => {
-  //     block.y += add;
-  //   });
-  // }
 }
 
 function loadEntities() {
@@ -238,6 +224,9 @@ function collision(e) {
       thing.onCollision(e);
     }
   });
+  if (user.y > canvas.height) {
+    userDeath()
+  }
 }
 
 function move() {
@@ -271,7 +260,12 @@ function gravity() {
 };
 
 function userDeath() {
-  console.log("dead");
+  user.x = levels[currentLevel].startX;
+  user.y = levels[currentLevel].startY;
+  levels[currentLevel].blocks.forEach((block) => {
+    block.x = block.startX;
+    block.y = block.startY;
+  });
 }
 
 function drawThings() {
@@ -287,20 +281,18 @@ function keyDown(a) {
       case "KeyD":
         user.speed = user.speedCap
         user.facing = 1;
+        leftPressed = true;
         break;
-
       case "KeyA":
         user.speed = -user.speedCap;
         user.facing = -1;
+        rightPressed = true;
         break;
-
       case "KeyW":
         break;
-
       case "KeyS":
         user.isCrouching = true;
         break;
-
       case "Space":
         if (!user.isJumping && !user.offGround){
           user.jumpStart = user.y;
@@ -319,11 +311,16 @@ function keyDown(a) {
 function keyUp(b) {
   switch (b.code) {
     case "KeyD":
-      user.speed = 0;
-      user.speedCounter = 1;
+      if (!rightPressed) {
+        user.speed = 0;
+      }
+      leftPressed = false;
       break;
     case "KeyA":
+      if (!leftPressed) {
         user.speed = 0;
+      }
+      rightPressed = false;
       break;
     case "KeyW":
       break;
@@ -395,45 +392,45 @@ function sprUserStanding() {
 
 function sprUserWalking() {
 
-  if (tickCount % 200 === 0) {
+  if (tickCount % 26 === 0) {
     sprUserWalkingFrame = (sprUserWalkingFrame === 1) ? 2 : 1
   }
 
   if (sprUserWalkingFrame === 1) {
     ctx.beginPath();
     ctx.rect(user.x, user.y, user.width, user.height);
-    ctx.fillStyle = "red";
+    ctx.fillStyle = "#6a6a6a";
     ctx.fill()
     ctx.closePath();
     if (user.facing === -1) {
       ctx.beginPath();
       ctx.rect(user.x, user.y, user.width /4, user.height);
-      ctx.fillStyle = "blue";
+      ctx.fillStyle = "#353535";
       ctx.fill()
       ctx.closePath();
     } else {
       ctx.beginPath();
       ctx.rect(user.x + user.width, user.y, -1 * user.width /4, user.height);
-      ctx.fillStyle = "blue";
+      ctx.fillStyle = "#353535";
       ctx.fill()
       ctx.closePath();
     }
   } else {
     ctx.beginPath();
     ctx.rect(user.x, user.y, user.width, user.height);
-    ctx.fillStyle = "blue";
+    ctx.fillStyle = "#353535";
     ctx.fill()
     ctx.closePath();
-    if (user.facing -1) {
+    if (user.facing === -1) {
       ctx.beginPath();
       ctx.rect(user.x, user.y, user.width /4, user.height);
-      ctx.fillStyle = "red";
+      ctx.fillStyle = "#6a6a6a";
       ctx.fill()
       ctx.closePath();
     } else {
       ctx.beginPath();
       ctx.rect(user.x + user.width, user.y, -1 * user.width /4, user.height);
-      ctx.fillStyle = "red";
+      ctx.fillStyle = "#6a6a6a";
       ctx.fill()
       ctx.closePath();
     }
