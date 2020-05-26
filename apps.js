@@ -6,7 +6,7 @@ let levels = [
 //level one
   {
     startX: 200,
-    startY: 408,
+    startY: 300,
     blocks: [
       {
         x: 100,
@@ -48,8 +48,8 @@ let levels = [
         y: 235,
         startX: 1420,
         startY: 235,
-        width: 50,
-        height: 50,
+        width: 60,
+        height: 60,
         color: "green",
         sprite: blockPlaceHolder,
         onCollision: normalBlock,
@@ -59,8 +59,8 @@ let levels = [
         y: 235,
         startX: 1620,
         startY: 235,
-        width: 50,
-        height: 50,
+        width: 60,
+        height: 60,
         color: "green",
         sprite: blockPlaceHolder,
         onCollision: normalBlock,
@@ -70,8 +70,8 @@ let levels = [
         y: 235,
         startX: 1820,
         startY: 235,
-        width: 50,
-        height: 50,
+        width: 60,
+        height: 60,
         color: "green",
         sprite: blockPlaceHolder,
         onCollision: normalBlock,
@@ -90,17 +90,255 @@ let levels = [
         onCollision: normalBlock,
       },
       {
-        x: 2520,
-        y: 435,
-        startX: 2520,
-        startY: 435,
-        width: 50,
-        height: 46,
+        x: 2580,
+        y: 400,
+        startX: 2580,
+        startY: 400,
+        width: 250,
+        height: 50,
         color: "green",
         sprite: blockPlaceHolder,
+        onCollision: normalBlock,
+      },
+
+
+
+      {
+        x: 2950,
+        y: 350,
+        startX: 2950,
+        startY: 350,
+        width: 60,
+        height: 60,
+        color: "green",
+        sprite: blockPlaceHolder,
+        onCollision: normalBlock,
+      },
+      {
+        x: 3100,
+        y: 220,
+        startX: 3100,
+        startY: 220,
+        width: 60,
+        height: 60,
+        color: "green",
+        sprite: blockPlaceHolder,
+        onCollision: normalBlock,
+      },
+      {
+        x: 3300,
+        y: 220,
+        startX: 3300,
+        startY: 220,
+        width: 60,
+        height: 60,
+        color: "green",
+        sprite: blockPlaceHolder,
+        onCollision: normalBlock,
+      },
+      {
+        x: 3500,
+        y: 100,
+        startX: 3500,
+        startY: 100,
+        width: 250,
+        height: 50,
+        color: "green",
+        sprite: blockPlaceHolder,
+        onCollision: normalBlock,
+      },
+      {
+        x: 3930,
+        y: 400,
+        startX: 3930,
+        startY: 400,
+        width: 280,
+        height: 50,
+        color: "green",
+        sprite: blockPlaceHolder,
+        onCollision: normalBlock,
+      },
+      {
+        x: 4330,
+        y: 270,
+        startX: 4330,
+        startY: 270,
+        width: 400,
+        height: 50,
+        color: "green",
+        sprite: blockPlaceHolder,
+        onCollision: normalBlock,
+      },
+      {
+        x: 4830,
+        y: 140,
+        startX: 4830,
+        startY: 140,
+        width: 300,
+        height: 50,
+        color: "green",
+        sprite: blockPlaceHolder,
+        onCollision: normalBlock,
+      },
+      {
+        x: 5280,
+        y: 425,
+        startX: 5280,
+        startY: 425,
+        width: 60,
+        height: 60,
+        color: "#0046b8",
+        sprite: blockPlaceHolder,
         onCollision: teleporter,
-        deltaX: -2350,
+        deltaX: 400,
+        deltaY: -355,
+      },
+      {
+        x: 5680,
+        y: 100,
+        startX: 5680,
+        startY: 100,
+        width: 60,
+        height: 60,
+        color: "#0046b8",
+        sprite: blockPlaceHolder,
+        onCollision: normalBlock,
+      },
+      {
+        x: 5750,
+        y: 290,
+        startX: 5750,
+        startY: 290,
+        width: 210,
+        height: 30,
+        color: "green",
+        sprite: blockPlaceHolder,
+        onCollision: normalBlock,
+      },
+      {
+        x: 6150,
+        y: 410,
+        startX: 6150,
+        startY: 410,
+        width: 60,
+        height: 60,
+        color: "green",
+        sprite: blockPlaceHolder,
+        onCollision: normalBlock,
+      },
+      {
+        x: 6210,
+        y: 410,
+        startX: 6210,
+        startY: 410,
+        width: 60,
+        height: 60,
+        color: "#0046b8",
+        sprite: blockPlaceHolder,
+        onCollision: teleporter,
+        deltaX: 0,
+        deltaY: -310,
+      },
+      {
+        x: 6210,
+        y: 100,
+        startX: 6210,
+        startY: 100,
+        width: 60,
+        height: 60,
+        color: "#0046b8",
+        sprite: blockPlaceHolder,
+        onCollision: normalBlock,
+      },
+      {
+        x: 6270,
+        y: 100,
+        startX: 6270,
+        startY: 100,
+        width: 130,
+        height: 60,
+        color: "green",
+        sprite: blockPlaceHolder,
+        onCollision: normalBlock,
+      },
+      {
+        x: 6550,
+        y: 380,
+        startX: 6550,
+        startY: 380,
+        width: 60,
+        height: 60,
+        color: "green",
+        sprite: blockPlaceHolder,
+        onCollision: normalBlock,
+      },
+      {
+        x: 6750,
+        y: 320,
+        startX: 6750,
+        startY: 320,
+        width: 60,
+        height: 60,
+        color: "green",
+        sprite: blockPlaceHolder,
+        onCollision: normalBlock,
+      },
+      {
+        x: 6900,
+        y: 180,
+        startX: 6900,
+        startY: 180,
+        width: 60,
+        height: 60,
+        color: "green",
+        sprite: blockPlaceHolder,
+        onCollision: normalBlock,
+      },
+      {
+        x: 7100,
+        y: 240,
+        startX: 7100,
+        startY: 240,
+        width: 60,
+        height: 60,
+        color: "green",
+        sprite: blockPlaceHolder,
+        onCollision: normalBlock,
+      },
+      {
+        x: 7300,
+        y: 400,
+        startX: 7300,
+        startY: 400,
+        width: 60,
+        height: 60,
+        color: "#0046b8",
+        sprite: blockPlaceHolder,
+        onCollision: teleporter,
+        deltaX: 400,
         deltaY: -300,
+      },
+      {
+        x: 7700,
+        y: 100,
+        startX: 7700,
+        startY: 100,
+        width: 60,
+        height: 60,
+        color: "#0046b8",
+        sprite: blockPlaceHolder,
+        onCollision: normalBlock,
+      },
+      {
+        x: 7900,
+        y: 100,
+        startX: 7900,
+        startY: 100,
+        width: 300,
+        height: 50,
+        color: "red",
+        sprite: blockPlaceHolder,
+        onCollision: endGame,
       },
     ],
   },
@@ -116,7 +354,9 @@ let user = {
   facing: 1,
   speed: 0,
   speedCap: 10,
-  speedCounter: 0,
+  speedCounter: 1,
+  accelDivisor: 2,
+  accelRate: 3,
   isJumping: false,
   ySpeed: 0,
   jumpSpeed: 26,
@@ -131,6 +371,7 @@ let user = {
 
 ///////////////////// ELEMENTS
 
+const message = document.getElementById("message");
 const canvas = document.getElementById("board");
 const ctx = canvas.getContext("2d");
 
@@ -186,6 +427,9 @@ function perTick() {
   if (canvas.className === "active") {
     window.requestAnimationFrame(perTick); //https://developer.mozilla.org/en-US/docs/Web/API/window/requestAnimationFrame Feb 22 2020
   }
+  if (user.speedCounter > 1) {
+    user.speedCounter++;
+  }
 };
 
 function resetAttributes() {
@@ -205,8 +449,10 @@ function adjustCamera() {
 }
 
 function loadEntities() {
+  if (user.x <= -user.width && user.x >= canvas.width) {
+    mobile.push(user);
+  }
   onScreenThings = mobile.concat();
-
   levels[currentLevel].blocks.forEach((block) => {
     if (block.x + block.width > 0 && block.x < canvas.width) {
       onScreenThings.push(block);
@@ -231,6 +477,11 @@ function collision(e) {
 
 function move() {
   mobile.forEach((c) => {
+    if (c.speedCounter % c.accelDivisor === 0) {
+      c.speed += c.accelRate * user.facing;
+      c.speed = (c.speed > c.speedCap) ? c.speedCap : c.speed;
+      c.speed = (c.speed < -c.speedCap) ? -c.speedCap : c.speed;
+    }
     c.x += c.speed;
 
     if (c.isJumping) {
@@ -279,13 +530,18 @@ function keyDown(a) {
   if (canvas.className === "active") {
     switch (a.code) {
       case "KeyD":
-        user.speed = user.speedCap
+        // user.speed = user.speedCap
         user.facing = 1;
+        if (user.speedCounter === 1) {
+          user.speedCounter++;
+        }
         leftPressed = true;
         break;
       case "KeyA":
-        user.speed = -user.speedCap;
         user.facing = -1;
+        if (user.speedCounter === 1) {
+          user.speedCounter++;
+        }
         rightPressed = true;
         break;
       case "KeyW":
@@ -301,9 +557,6 @@ function keyDown(a) {
           user.hangCounter = 0;
         };
         break;
-      case "KeyP":
-        canvas.className = (canvas.className === "active") ? "inactive" : "active";
-        break;
     }
   }
 };
@@ -313,12 +566,14 @@ function keyUp(b) {
     case "KeyD":
       if (!rightPressed) {
         user.speed = 0;
+        user.speedCounter = 1;
       }
       leftPressed = false;
       break;
     case "KeyA":
       if (!leftPressed) {
         user.speed = 0;
+        user.speedCounter = 1;
       }
       rightPressed = false;
       break;
@@ -361,6 +616,11 @@ function teleporter(e) {
   } else {
     e.x -= e.speed;
   }
+}
+
+function endGame() {
+  canvas.className = "inactive";
+  message.innerHTML = "You win!"
 }
 
 ///////////////////// SPRITES
